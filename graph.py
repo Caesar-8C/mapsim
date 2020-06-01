@@ -10,19 +10,19 @@ class Draw:
 		self.shift = shift
 
 	def line(self, surface, color, start_pos, end_pos, width):
-		start_pos = (int(start_pos[0]*self.scale + self.shift[0]), int(start_pos[1]*self.scale + self.shift[1]))
-		end_pos = (int(end_pos[0]*self.scale + self.shift[0]), int(end_pos[1]*self.scale + self.shift[1]))
+		start_pos = (int((start_pos[0]+self.shift[0]) * self.scale), int((start_pos[1]+self.shift[1]) * self.scale))
+		end_pos = (int((end_pos[0]+self.shift[0]) * self.scale), int((end_pos[1]+self.shift[1]) * self.scale))
 		pyg.draw.line(surface, color, start_pos, end_pos, width)
 
 	def circle(self, surface, color, center, radius):
-		center = (int(center[0]*self.scale + self.shift[0]), int(center[1]*self.scale + self.shift[1]))
+		center = (int((center[0]+self.shift[0]) * self.scale), int((center[1]+self.shift[1]) * self.scale))
 		radius = int(radius*self.scale)
 		pyg.draw.circle(surface, color, center, radius)
 
 	def polygon(self, surface, color, points):
 		p = []
 		for point in points:
-			p.append((int(point[0]*self.scale + self.shift[0]), int(point[1]*self.scale + self.shift[1])))
+			p.append((int((point[0]+self.shift[0]) * self.scale), int((point[1]+self.shift[1]) * self.scale)))
 		pyg.draw.polygon(surface, color, tuple(p))
 
 
@@ -88,9 +88,10 @@ class Map:
 			return (t1[0] + t2[0], t1[1] + t2[1])
 		def tupleSubtract(t1, t2):
 			return (t1[0] - t2[0], t1[1] - t2[1])
+		def descaleMouse(pos):
+			return (int(pos[0]/self.draw.scale-self.draw.shift[0]), int(pos[1]/self.draw.scale-self.draw.shift[1]))
 
 		def activateElement(pos):
-			pos = (int(pos[0]/self.draw.scale), int(pos[1]/self.draw.scale)) #TODO add shift to mouse
 			def between(a, b, c):
 				if b > c:
 					if b > a and a > c:
@@ -132,9 +133,10 @@ class Map:
 				if event.type == pyg.QUIT:
 					sys.exit()
 				if event.type == pyg.MOUSEBUTTONDOWN and event.button == 1:
-					activateElement(event.pos)
+					activateElement(descaleMouse(event.pos))
 				if event.type == pyg.MOUSEBUTTONUP and event.button == 1:
 					self.activeReset()
+
 				if event.type == pyg.MOUSEMOTION and not self.activeNode == False:
 					self.G.nodes[self.activeNode]['coordinates'] = tupleSum(self.G.nodes[self.activeNode]['coordinates'], mouseScale(event.rel))
 				if event.type == pyg.MOUSEMOTION and not self.activeEdge == False:
@@ -146,20 +148,24 @@ class Map:
 					self.draw.shift = tupleSum(self.draw.shift, mouseScale(event.rel))
 
 				if event.type == pyg.MOUSEBUTTONDOWN and event.button == 4:
-					activateElement(event.pos)
+					activateElement(descaleMouse(event.pos))
 					if not self.activeEdge == False:
 						self.G.edges[self.activeEdge]['width'] += 4
 					if self.activeBackground == True:
+						pos_1 = descaleMouse(event.pos)
 						self.draw.scale *= 1.1
+						self.draw.shift = tupleSum(self.draw.shift, tupleSubtract(descaleMouse(event.pos), pos_1))
 					self.activeReset()
 				if event.type == pyg.MOUSEBUTTONDOWN and event.button == 5:
-					activateElement(event.pos)
+					activateElement(descaleMouse(event.pos))
 					if not self.activeEdge == False:
 						self.G.edges[self.activeEdge]['width'] -= 4
 						if self.G.edges[self.activeEdge]['width'] < 1:
 							self.G.edges[self.activeEdge]['width'] = 1
 					if self.activeBackground == True:
+						pos_1 = descaleMouse(event.pos)
 						self.draw.scale /= 1.1
+						self.draw.shift = tupleSum(self.draw.shift, tupleSubtract(descaleMouse(event.pos), pos_1))
 					self.activeReset()
 
 				if event.type == self.AGENT1:
