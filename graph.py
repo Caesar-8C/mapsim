@@ -38,6 +38,7 @@ class Map:
 		self.fps = 60
 		self.agentNameCounter = 0
 		self.draw = Draw()
+		self.rel_residual = (0, 0)
 
 		self.activeNode = False
 		self.activeEdge = False
@@ -126,7 +127,9 @@ class Map:
 			self.activeBackground = True
 
 		def mouseScale(rel):
-			return (int(rel[0]/self.draw.scale), int(rel[1]/self.draw.scale))
+			rel = tupleSum((rel[0]/self.draw.scale, rel[1]/self.draw.scale), self.rel_residual)
+			self.rel_residual = (rel[0]-int(rel[0]), rel[1]-int(rel[1]))
+			return (int(rel[0]), int(rel[1]))
 
 		def eventHandlerLoop():
 			for event in pyg.event.get():
@@ -135,6 +138,7 @@ class Map:
 				if event.type == pyg.MOUSEBUTTONDOWN and event.button == 1:
 					activateElement(descaleMouse(event.pos))
 				if event.type == pyg.MOUSEBUTTONUP and event.button == 1:
+					self.rel_residual = (0, 0)
 					self.activeReset()
 
 				if event.type == pyg.MOUSEMOTION and not self.activeNode == False:
