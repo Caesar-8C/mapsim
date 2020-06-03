@@ -82,17 +82,17 @@ def drawLanes(self, node, successor):
 
 			self.draw.line(self.screen, self.LANE_COLOR, (x3, y3), (x4, y4), 1)
 
-def drawRooms(self, node, successor):
-	x1 = self.G.nodes[node]['coordinates'][0]
-	y1 = self.G.nodes[node]['coordinates'][1]
-	x2 = self.G.nodes[successor]['coordinates'][0]
-	y2 = self.G.nodes[successor]['coordinates'][1]
-	width = self.G.edges[node, successor]['width']
+def drawRooms(self):
+	for roomNumber in self.rooms:
+		x1 = self.G.nodes[self.rooms[roomNumber].start]['coordinates'][0]
+		y1 = self.G.nodes[self.rooms[roomNumber].start]['coordinates'][1]
+		x2 = self.G.nodes[self.rooms[roomNumber].end]['coordinates'][0]
+		y2 = self.G.nodes[self.rooms[roomNumber].end]['coordinates'][1]
+		width = self.G.edges[self.rooms[roomNumber].start, self.rooms[roomNumber].end]['width']
 
-	angleAcross = np.arctan2(x1-x2, y2-y1)
-	angleAlong = np.arctan2(y1-y2, x1-x2)
-	for room in self.G.edges[node, successor]['rooms']:
-		dist = self.G.edges[node, successor]['rooms'][room]
+		angleAcross = np.arctan2(x1-x2, y2-y1)
+		angleAlong = np.arctan2(y1-y2, x1-x2)
+		dist = self.rooms[roomNumber].distance
 		x3 = x1 + np.cos(angleAlong)*dist - np.sign(dist)*np.cos(angleAcross)*width/2
 		y3 = y1 + np.sin(angleAlong)*dist - np.sign(dist)*np.sin(angleAcross)*width/2
 
@@ -144,7 +144,6 @@ def drawSuccessors(self, node, visited):
 	visited.append(node)
 	for successor in list(self.G.successors(node)):
 		self.drawCorridor(node, successor)
-		self.drawRooms(node, successor)
 		self.drawLanes(node, successor)
 		if successor not in visited:
 			self.drawSuccessors(successor, visited)

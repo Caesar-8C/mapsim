@@ -26,9 +26,9 @@ def eventHandlerLoop(self):
 			self.G.nodes[self.activeEdge[0]]['coordinates'] = tupleSum(self.G.nodes[self.activeEdge[0]]['coordinates'], self.mouseScale(event.rel))
 			self.G.nodes[self.activeEdge[1]]['coordinates'] = tupleSum(self.G.nodes[self.activeEdge[1]]['coordinates'], self.mouseScale(event.rel))
 
-
 		if event.type == pyg.MOUSEMOTION and self.activeBackground == True:
 			self.draw.shift = tupleSum(self.draw.shift, self.mouseScale(event.rel))
+
 
 		if event.type == pyg.MOUSEBUTTONDOWN and event.button == 4:
 			self.activateElement(self.mouseDescale(event.pos))

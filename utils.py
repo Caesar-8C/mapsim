@@ -21,6 +21,12 @@ class Agent:
 		self.speed = speed
 		self.distance = 0
 
+class Room:
+	def __init__(self, start, end, distance):
+		self.start = start
+		self.end = end
+		self.distance = distance
+
 def typecheck(a):#TODO
 	b = []
 	if a[0] == '\'' and a[-1] == '\'':

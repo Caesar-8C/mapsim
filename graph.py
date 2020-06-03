@@ -18,6 +18,7 @@ class Map:
 		pyg.init()
 		self.screen = pyg.display.set_mode(self.size)
 		self.clock = pyg.time.Clock()
+		self.rooms = {}
 		self.agents = {}
 		self.fps = 60
 		self.agentNameCounter = 0
@@ -44,11 +45,6 @@ class Map:
 		pyg.time.set_timer(self.AGENT2, 1200)
 		pyg.time.set_timer(self.AGENT3, 4000)
 
-	def run_agent(self, origin_node, end_node, lane, speed):
-		agent = Agent(origin_node, end_node, lane, speed)
-		self.agents[self.agentNameCounter] = agent
-		self.agentNameCounter += 1
-
 	def add_node(self, name, x, y):
 		self.G.add_node(name)
 		self.G.nodes[name]['coordinates'] = (x, y)
@@ -58,7 +54,16 @@ class Map:
 		self.G.edges[start, end]['width'] = width
 		self.G.edges[start, end]['lanes'] = 1
 		self.G.edges[start, end]['laneWidth'] = width
-		self.G.edges[start, end]['rooms'] = {}
+
+	def add_room(self, number, start, end, distance):
+		# TODO check if edge exists
+		room = Room(start, end, distance)
+		self.rooms[number] = room
+
+	def run_agent(self, origin_node, end_node, lane, speed):
+		agent = Agent(origin_node, end_node, lane, speed)
+		self.agents[self.agentNameCounter] = agent
+		self.agentNameCounter += 1
 
 	def activeReset(self):
 		self.activeNode = False
@@ -99,6 +104,7 @@ class Map:
 		
 			node = 1
 			self.drawSuccessors(node, [])
+			self.drawRooms()
 			self.drawAgents()
 
 			pyg.display.flip()
@@ -107,6 +113,5 @@ if __name__ == '__main__':
 	map = Map()
 
 	map.loadGraph('data/graph2.txt')
-	map.G.edges[2, 3]['rooms'][501] = -60
 
 	map.main()

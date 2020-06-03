@@ -17,6 +17,9 @@ def loadGraph(self, file):
 		if words[0] == 'edge':
 			self.add_edge(start=int(words[1]), end=int(words[2]), width=int(words[3]))
 
+		if words[0] == 'room':
+			self.add_room(number=int(words[1]), start=int(words[2]), end=int(words[3]), distance=int(words[4]))
+
 	f.close()
 
 def saveGraph(self, file):
