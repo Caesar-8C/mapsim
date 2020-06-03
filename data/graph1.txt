@@ -1,0 +1,11 @@
+node 1 500 200
+node 2 400 300
+node 3 500 400
+node 4 600 300
+node 5 300 400
+
+edge 1 2 25
+edge 2 3 50
+edge 3 4 25
+edge 2 5 13
+edge 4 1 13
