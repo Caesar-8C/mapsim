@@ -16,6 +16,7 @@ def eventHandlerLoop(self):
 			sys.exit()
 		if event.type == pyg.MOUSEBUTTONDOWN and event.button == 1:
 			self.activateElement(self.mouseDescale(event.pos))
+			print(self.inside(self.mouseDescale(event.pos)))
 		if event.type == pyg.MOUSEBUTTONUP and event.button == 1:
 			self.rel_residual = (0, 0)
 			self.activeReset()
@@ -59,6 +60,6 @@ def eventHandlerLoop(self):
 		if event.type == self.AGENT1:
 			self.run_agent(origin_node=2, end_node=3, lane=1, speed=60)
 		if event.type == self.AGENT2:
-			self.run_agent(origin_node=3, end_node=4, lane=0, speed=50)
+			self.run_agent(origin_node=3, end_node=11, lane=0, speed=50)
 		if event.type == self.AGENT3:
 			self.run_agent(origin_node=2, end_node=3, lane=0, speed=-60)

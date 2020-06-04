@@ -23,33 +23,35 @@ class Draw:
 		pyg.draw.polygon(surface, color, tuple(p))
 
 
-def drawCorridor(self, node, successor):
-	x1 = self.G.nodes[node]['coordinates'][0]
-	y1 = self.G.nodes[node]['coordinates'][1]
-	x2 = self.G.nodes[successor]['coordinates'][0]
-	y2 = self.G.nodes[successor]['coordinates'][1]
-	halfWidth = self.G.edges[node, successor]['width']/2
+def drawNodes(self):
+	for node in self.G.nodes:
+		self.draw.circle(self.screen, self.NODE_COLOR, self.G.nodes[node]['coordinates'], self.NODE_SIZE)
 
-	angle = np.arctan2(x1-x2, y2-y1)
-	x3 = x1 + np.cos(angle)*halfWidth
-	y3 = y1 + np.sin(angle)*halfWidth
+def drawCorridors(self):
+	for corridor in self.G.edges:
+		x1, y1 = self.G.nodes[corridor[0]]['coordinates']
+		x2, y2 = self.G.nodes[corridor[1]]['coordinates']
+		halfWidth = self.G.edges[corridor[0], corridor[1]]['width']/2
 
-	x4 = x1 - np.cos(angle)*halfWidth
-	y4 = y1 - np.sin(angle)*halfWidth
+		angle = np.arctan2(x1-x2, y2-y1)
+		x3 = x1 + np.cos(angle)*halfWidth
+		y3 = y1 + np.sin(angle)*halfWidth
 
-	x5 = x2 - np.cos(angle)*halfWidth
-	y5 = y2 - np.sin(angle)*halfWidth
+		x4 = x1 - np.cos(angle)*halfWidth
+		y4 = y1 - np.sin(angle)*halfWidth
 
-	x6 = x2 + np.cos(angle)*halfWidth
-	y6 = y2 + np.sin(angle)*halfWidth
+		x5 = x2 - np.cos(angle)*halfWidth
+		y5 = y2 - np.sin(angle)*halfWidth
 
-	self.draw.polygon(self.screen, self.CORRIDOR_COLOR, ((x3, y3), (x4, y4), (x5, y5), (x6, y6)))
+		x6 = x2 + np.cos(angle)*halfWidth
+		y6 = y2 + np.sin(angle)*halfWidth
+
+		self.draw.polygon(self.screen, self.CORRIDOR_COLOR, ((x3, y3), (x4, y4), (x5, y5), (x6, y6)))
+		self.drawLanes(corridor[0], corridor[1])
 
 def drawLanes(self, node, successor):
-	x1 = self.G.nodes[node]['coordinates'][0]
-	y1 = self.G.nodes[node]['coordinates'][1]
-	x2 = self.G.nodes[successor]['coordinates'][0]
-	y2 = self.G.nodes[successor]['coordinates'][1]
+	x1, y1 = self.G.nodes[node]['coordinates']
+	x2, y2 = self.G.nodes[successor]['coordinates']
 	width = self.G.edges[node, successor]['width']
 	
 	lanes = int(width/self.LANE_PIXEL_WIDTH)
@@ -84,10 +86,8 @@ def drawLanes(self, node, successor):
 
 def drawRooms(self):
 	for roomNumber in self.rooms:
-		x1 = self.G.nodes[self.rooms[roomNumber].start]['coordinates'][0]
-		y1 = self.G.nodes[self.rooms[roomNumber].start]['coordinates'][1]
-		x2 = self.G.nodes[self.rooms[roomNumber].end]['coordinates'][0]
-		y2 = self.G.nodes[self.rooms[roomNumber].end]['coordinates'][1]
+		x1, y1 = self.G.nodes[self.rooms[roomNumber].start]['coordinates']
+		x2, y2 = self.G.nodes[self.rooms[roomNumber].end]['coordinates']
 		width = self.G.edges[self.rooms[roomNumber].start, self.rooms[roomNumber].end]['width']
 
 		angleAcross = np.arctan2(x1-x2, y2-y1)
@@ -107,10 +107,8 @@ def drawAgents(self):
 		#TODO add lane existence check
 		#TODO add negative speed check
 		agent = self.agents[agentIndex]
-		x1 = self.G.nodes[agent.origin_node]['coordinates'][0]
-		y1 = self.G.nodes[agent.origin_node]['coordinates'][1]
-		x2 = self.G.nodes[agent.end_node]['coordinates'][0]
-		y2 = self.G.nodes[agent.end_node]['coordinates'][1]
+		x1, y1 = self.G.nodes[agent.origin_node]['coordinates']
+		x2, y2 = self.G.nodes[agent.end_node]['coordinates']
 		laneWidth = self.G.edges[agent.origin_node, agent.end_node]['laneWidth']
 		width = self.G.edges[agent.origin_node, agent.end_node]['width']
 
@@ -138,14 +136,3 @@ def drawAgents(self):
 
 	for i in indicesToDelete:
 		del self.agents[i]
-
-
-def drawSuccessors(self, node, visited):
-	visited.append(node)
-	for successor in list(self.G.successors(node)):
-		self.drawCorridor(node, successor)
-		self.drawLanes(node, successor)
-		if successor not in visited:
-			self.drawSuccessors(successor, visited)
-
-	self.draw.circle(self.screen, self.NODE_COLOR, self.G.nodes[node]['coordinates'], self.NODE_SIZE)

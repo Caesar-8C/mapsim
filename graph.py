@@ -8,7 +8,7 @@ from draw import Draw
 
 class Map:
 	from eventHandlerLoop import eventHandlerLoop, mouseScale, mouseDescale
-	from draw import drawCorridor, drawRooms, drawLanes, drawAgents, drawSuccessors
+	from draw import drawNodes, drawCorridors, drawLanes, drawRooms, drawAgents
 	from fileManager import loadGraph, saveGraph
 
 	def __init__(self):
@@ -71,17 +71,17 @@ class Map:
 		self.activeBackground = False
 
 	def activateElement(self, pos):
-		for node in list(self.G.nodes):
+		for node in self.G.nodes:
 			dist = np.linalg.norm(tupleSubtract(self.G.nodes[node]['coordinates'], pos))
 			if dist < self.NODE_SIZE:
 				self.activeNode = node
 				return
 
-		for edge in list(self.G.edges):
+		for edge in self.G.edges:
 			x0, y0 = pos
 			x1, y1 = self.G.nodes[edge[0]]['coordinates']
 			x2, y2 = self.G.nodes[edge[1]]['coordinates']
-			if x2-x1 == 0 or y1-y2 == 0:
+			if x2-x1 == 0 or y1-y2 == 0: # TODO fix axis parallel lines
 				continue
 			a = 1./(x2 - x1)
 			b = 1./(y1 - y2)
@@ -95,15 +95,41 @@ class Map:
 					return
 		self.activeBackground = True
 
+	def inside(self, pos):
+		corridor = (1, 2)
+		x1, y1 = self.G.nodes[corridor[0]]['coordinates']
+		x2, y2 = self.G.nodes[corridor[1]]['coordinates']
+		halfWidth = self.G.edges[corridor[0], corridor[1]]['width']/2
+
+		angle = np.arctan2(x1-x2, y2-y1)
+		x3 = x1 + np.cos(angle)*halfWidth
+		y3 = y1 + np.sin(angle)*halfWidth
+
+		x4 = x1 - np.cos(angle)*halfWidth
+		y4 = y1 - np.sin(angle)*halfWidth
+
+		x6 = x2 + np.cos(angle)*halfWidth
+		y6 = y2 + np.sin(angle)*halfWidth
+
+		AM = tupleSubtract(pos, (x3, y3))
+		AB = tupleSubtract((x4, y4), (x3, y3))
+		AD = tupleSubtract((x6, y6), (x3, y3))
+
+		if (0<self.dot(AM,AB) and self.dot(AM,AB)<self.dot(AB,AB)) or (0<self.dot(AM,AD) and self.dot(AM,AD)<self.dot(AD,AD)):
+			return True
+		return False
+
+	def dot(self, a, b):
+		return a[0]*b[0] + a[1]*b[1]
+
 	def main(self):
 		while True:
 			self.screen.fill(self.bgcolour)
 			self.clock.tick(self.fps)
 			self.eventHandlerLoop()
 
-		
-			node = 1
-			self.drawSuccessors(node, [])
+			self.drawCorridors()
+			self.drawNodes()
 			self.drawRooms()
 			self.drawAgents()
 

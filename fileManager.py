@@ -38,5 +38,9 @@ def saveGraph(self, file):
 
 	for edge in self.G.edges:
 		f.write('edge '+str(edge[0])+' '+str(edge[1])+' '+str(self.G.edges[edge]['width'])+'\n')
+	f.write('\n')
+	
+	for room in self.rooms:
+		f.write('room '+str(room)+' '+str(self.rooms[room].start)+' '+str(self.rooms[room].end)+' '+str(self.rooms[room].distance)+'\n')
 
 	f.close()
