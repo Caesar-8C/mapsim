@@ -1,0 +1,30 @@
+scale 0.7697371773460596
+shift 20 -212
+
+node 1 100 300
+node 2 500 300
+node 3 900 300
+node 4 300 500
+node 5 500 500
+node 6 700 500
+node 7 100 700
+node 8 300 700
+node 9 300 900
+node 10 700 900
+node 11 900 900
+
+edge 1 2 60
+edge 1 7 60
+edge 2 3 60
+edge 2 5 60
+edge 3 11 60
+edge 5 4 60
+edge 5 6 60
+edge 6 10 60
+edge 7 8 60
+edge 8 4 60
+edge 8 9 60
+edge 9 10 60
+edge 11 10 60
+
+room 501 2 3 -60
