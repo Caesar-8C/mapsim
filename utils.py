@@ -26,11 +26,3 @@ class Room:
 		self.start = start
 		self.end = end
 		self.distance = distance
-
-def typecheck(a):#TODO
-	b = []
-	if a[0] == '\'' and a[-1] == '\'':
-		for i in range(1, len(a)-1):
-			b.append(a[i])
-		return b
-	return int(a)

@@ -16,7 +16,6 @@ def eventHandlerLoop(self):
 			sys.exit()
 		if event.type == pyg.MOUSEBUTTONDOWN and event.button == 1:
 			self.activateElement(self.mouseDescale(event.pos))
-			print(self.inside(self.mouseDescale(event.pos)))
 		if event.type == pyg.MOUSEBUTTONUP and event.button == 1:
 			self.rel_residual = (0, 0)
 			self.activeReset()
