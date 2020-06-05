@@ -136,3 +136,6 @@ def drawAgents(self):
 
 	for i in indicesToDelete:
 		del self.agents[i]
+
+def drawRobot(self):
+	self.draw.circle(self.screen, (255, 0, 0), (self.robot.x, self.robot.y), 10)

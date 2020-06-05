@@ -20,14 +20,16 @@ def eventHandlerLoop(self):
 			self.rel_residual = (0, 0)
 			self.activeReset()
 
+		if event.type == pyg.MOUSEMOTION:
+			rel = self.mouseScale(event.rel)
 		if event.type == pyg.MOUSEMOTION and not self.activeNode == False:
-			self.G.nodes[self.activeNode]['coordinates'] = tupleSum(self.G.nodes[self.activeNode]['coordinates'], self.mouseScale(event.rel))
+			self.G.nodes[self.activeNode]['coordinates'] = tupleSum(self.G.nodes[self.activeNode]['coordinates'], rel)
 		if event.type == pyg.MOUSEMOTION and not self.activeEdge == False:
-			self.G.nodes[self.activeEdge[0]]['coordinates'] = tupleSum(self.G.nodes[self.activeEdge[0]]['coordinates'], self.mouseScale(event.rel))
-			self.G.nodes[self.activeEdge[1]]['coordinates'] = tupleSum(self.G.nodes[self.activeEdge[1]]['coordinates'], self.mouseScale(event.rel))
+			self.G.nodes[self.activeEdge[0]]['coordinates'] = tupleSum(self.G.nodes[self.activeEdge[0]]['coordinates'], rel)
+			self.G.nodes[self.activeEdge[1]]['coordinates'] = tupleSum(self.G.nodes[self.activeEdge[1]]['coordinates'], rel)
 
 		if event.type == pyg.MOUSEMOTION and self.activeBackground == True:
-			self.draw.shift = tupleSum(self.draw.shift, self.mouseScale(event.rel))
+			self.draw.shift = tupleSum(self.draw.shift, rel)
 
 
 		if event.type == pyg.MOUSEBUTTONDOWN and event.button == 4:
@@ -62,3 +64,28 @@ def eventHandlerLoop(self):
 			self.run_agent(origin_node=3, end_node=11, lane=0, speed=50)
 		if event.type == self.AGENT3:
 			self.run_agent(origin_node=2, end_node=3, lane=0, speed=-60)
+
+
+		# ROBOT
+
+		if event.type == pyg.KEYDOWN:
+			if event.key == pyg.K_w:
+				self.controlAction[0] = 1
+			if event.key == pyg.K_s:
+				self.controlAction[0] = -1
+			if event.key == pyg.K_d:
+				self.controlAction[1] = 1
+			if event.key == pyg.K_a:
+				self.controlAction[1] = -1
+			if event.key == pyg.K_e:
+				self.controlAction[2] = 1
+			if event.key == pyg.K_q:
+				self.controlAction[2] = -1
+
+		if event.type == pyg.KEYUP:
+			if event.key == pyg.K_w or event.key == pyg.K_s:
+				self.controlAction[0] = 0
+			if event.key == pyg.K_a or event.key == pyg.K_d:
+				self.controlAction[1] = 0
+			if event.key == pyg.K_q or event.key == pyg.K_e:
+				self.controlAction[2] = 0

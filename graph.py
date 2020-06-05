@@ -8,7 +8,7 @@ from draw import Draw
 
 class Map:
 	from eventHandlerLoop import eventHandlerLoop, mouseScale, mouseDescale
-	from draw import drawNodes, drawCorridors, drawLanes, drawRooms, drawAgents
+	from draw import drawNodes, drawCorridors, drawLanes, drawRooms, drawAgents, drawRobot
 	from fileManager import loadGraph, saveGraph
 
 	def __init__(self):
@@ -24,6 +24,9 @@ class Map:
 		self.agentNameCounter = 0
 		self.draw = Draw()
 		self.rel_residual = (0, 0)
+
+		self.robot = Robot(0, 0)
+		self.controlAction = [0, 0, 0]
 
 		self.activeNode = False
 		self.activeEdge = False
@@ -112,6 +115,9 @@ class Map:
 			self.drawNodes()
 			self.drawRooms()
 			self.drawAgents()
+
+			self.robot.move(self.controlAction)
+			self.drawRobot()
 
 			pyg.display.flip()
 
