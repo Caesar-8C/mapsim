@@ -12,7 +12,7 @@ class Map:
 	from fileManager import loadGraph, saveGraph
 
 	def __init__(self):
-		self.G = nx.DiGraph()
+		self.G = nx.Graph() # removed Di, TODO test
 		self.bgcolour = 0x2F, 0x4F, 0x4F
 		self.size = self.width, self.height = 800, 600
 		pyg.init()
@@ -25,16 +25,19 @@ class Map:
 		self.draw = Draw()
 		self.rel_residual = (0, 0)
 
-		self.robot = Robot(0, 0)
+		self.robot = Robot(200, 700, self)
 		self.controlAction = [0, 0, 0]
 
 		self.activeNode = False
 		self.activeEdge = False
 		self.activeBackground = False
 
-		self.NODE_SIZE = 10
+		self.NODE_SIZE = 30
+		self.NODE_CORE_SIZE = 10
 		self.MIN_CLICKABLE_CORRIDOR_WIDTH = 5
 		self.LANE_PIXEL_WIDTH = 20
+		self.ROBOT_SIZE = 10
+		self.ROBOT_COLOR = (255, 0, 0)
 		self.NODE_COLOR = (0, 128, 0)
 		self.CORRIDOR_COLOR = (255, 255, 255)
 		self.LANE_COLOR = (0, 100, 0)
@@ -76,7 +79,7 @@ class Map:
 	def activateElement(self, pos):
 		for node in self.G.nodes:
 			dist = np.linalg.norm(tupleSubtract(self.G.nodes[node]['coordinates'], pos))
-			if dist < self.NODE_SIZE:
+			if dist < self.NODE_CORE_SIZE:
 				self.activeNode = node
 				return
 
@@ -111,8 +114,9 @@ class Map:
 			self.clock.tick(self.fps)
 			self.eventHandlerLoop()
 
+			self.drawNodes(color=self.CORRIDOR_COLOR)
 			self.drawCorridors()
-			self.drawNodes()
+			self.drawNodes(radius=self.NODE_CORE_SIZE)
 			self.drawRooms()
 			self.drawAgents()
 

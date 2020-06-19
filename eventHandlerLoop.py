@@ -70,22 +70,22 @@ def eventHandlerLoop(self):
 
 		if event.type == pyg.KEYDOWN:
 			if event.key == pyg.K_w:
-				self.controlAction[0] = 1
+				self.controlAction[0] = 1.2
 			if event.key == pyg.K_s:
-				self.controlAction[0] = -1
-			if event.key == pyg.K_d:
-				self.controlAction[1] = 1
-			if event.key == pyg.K_a:
-				self.controlAction[1] = -1
+				self.controlAction[0] = -1.2
 			if event.key == pyg.K_e:
-				self.controlAction[2] = 1
+				self.controlAction[1] = 1.2
 			if event.key == pyg.K_q:
-				self.controlAction[2] = -1
+				self.controlAction[1] = -1.2
+			if event.key == pyg.K_d:
+				self.controlAction[2] = 1.2
+			if event.key == pyg.K_a:
+				self.controlAction[2] = -1.2
 
 		if event.type == pyg.KEYUP:
 			if event.key == pyg.K_w or event.key == pyg.K_s:
 				self.controlAction[0] = 0
-			if event.key == pyg.K_a or event.key == pyg.K_d:
-				self.controlAction[1] = 0
 			if event.key == pyg.K_q or event.key == pyg.K_e:
+				self.controlAction[1] = 0
+			if event.key == pyg.K_a or event.key == pyg.K_d:
 				self.controlAction[2] = 0

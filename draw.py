@@ -23,9 +23,14 @@ class Draw:
 		pyg.draw.polygon(surface, color, tuple(p))
 
 
-def drawNodes(self):
+def drawNodes(self, color=None, radius=None):
+	if color == None:
+		color = self.NODE_COLOR
+	if radius == None:
+		radius = self.NODE_SIZE
+
 	for node in self.G.nodes:
-		self.draw.circle(self.screen, self.NODE_COLOR, self.G.nodes[node]['coordinates'], self.NODE_SIZE)
+		self.draw.circle(self.screen, color, self.G.nodes[node]['coordinates'], radius)
 
 def drawCorridors(self):
 	for corridor in self.G.edges:
@@ -138,4 +143,6 @@ def drawAgents(self):
 		del self.agents[i]
 
 def drawRobot(self):
-	self.draw.circle(self.screen, (255, 0, 0), (self.robot.x, self.robot.y), 10)
+	self.draw.circle(self.screen, self.ROBOT_COLOR, (self.robot.x, self.robot.y), self.ROBOT_SIZE)
+	robotFront = (self.robot.x + np.cos(self.robot.theta)*self.ROBOT_SIZE, self.robot.y + np.sin(self.robot.theta)*self.ROBOT_SIZE)
+	self.draw.line(self.screen, self.LANE_COLOR, (self.robot.x, self.robot.y), robotFront, 1)
