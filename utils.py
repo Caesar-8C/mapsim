@@ -17,6 +17,10 @@ def between(a, b, c):
 
 class Agent:
 	def __init__(self, origin_node, end_node, lane, speed):
+		self.x = 0
+		self.y = 0
+		self.size = 0
+
 		self.origin_node = origin_node
 		self.end_node = end_node
 		self.lane = lane
@@ -40,13 +44,45 @@ class Robot:
 		self.velocity = [0, 0, 0]
 		self.maxVelocity = [100./self.map.fps, 100./self.map.fps, 150./self.map.fps] # pixels per second
 
-	def collisionCheck(self):
+		self.COLLISION_DISCRETIZATION = 13
+
+
+	def move(self, controlAction):
+		self.x += self.velocity[0]*np.cos(self.theta) - self.velocity[1]*np.sin(self.theta)
+		self.y += self.velocity[0]*np.sin(self.theta) + self.velocity[1]*np.cos(self.theta)
+		self.theta += self.velocity[2]*np.pi/180.
+
+		for i in range(3):
+			self.velocity[i] = self.changeVelocity(self.velocity[i], controlAction[i], self.maxVelocity[i])
+
+		if not self.obstacleCollisionCheck():
+			self.reset()
+
+		for i in np.linspace(0, 2*np.pi, num=self.COLLISION_DISCRETIZATION):
+			x = self.x + np.cos(i)*self.map.ROBOT_SIZE
+			y = self.y + np.sin(i)*self.map.ROBOT_SIZE
+			if not self.mapCollisionCheck((x, y)):
+				self.reset()
+
+
+	def changeVelocity(self, velocity, controlAction, maxVelocity):
+		velocity += controlAction - np.sign(velocity)*1
+		if controlAction == 0 and abs(velocity) < 1:
+			velocity = 0
+		if abs(velocity) > maxVelocity:
+			return np.sign(velocity) * maxVelocity
+		return velocity
+
+	def obstacleCollisionCheck(self):
 		pos = (self.x, self.y)
-
 		for agent in self.map.agents:
-			self.map.agents[agent]
-			# TODO get agent coordinates
+			agent_pos = (self.map.agents[agent].x, self.map.agents[agent].y)
+			dist = np.linalg.norm(tupleSubtract(agent_pos, pos))
+			if dist < self.map.agents[agent].size + self.map.ROBOT_SIZE:
+				return False
+		return True
 
+	def mapCollisionCheck(self, pos):
 		for node in self.map.G.nodes:
 			dist = np.linalg.norm(tupleSubtract(self.map.G.nodes[node]['coordinates'], pos))
 			if dist < self.map.NODE_SIZE:
@@ -76,21 +112,8 @@ class Robot:
 
 		return False
 
-	def changeVelocity(self, velocity, controlAction, maxVelocity):
-		velocity += controlAction - np.sign(velocity)*1
-		if controlAction == 0 and abs(velocity) < 1:
-			velocity = 0
-		if abs(velocity) > maxVelocity:
-			return np.sign(velocity) * maxVelocity
-		return velocity
 
-	def move(self, controlAction):
-		self.x += self.velocity[0]*np.cos(self.theta) - self.velocity[1]*np.sin(self.theta)
-		self.y += self.velocity[0]*np.sin(self.theta) + self.velocity[1]*np.cos(self.theta)
-		self.theta += self.velocity[2]*np.pi/180.
-
-		for i in range(3):
-			self.velocity[i] = self.changeVelocity(self.velocity[i], controlAction[i], self.maxVelocity[i])
-
-		if not self.collisionCheck():
-			self.x, self.y = self.resetCoordinates
+	def reset(self):
+		self.x, self.y = self.resetCoordinates
+		self.theta = 0
+		self.velocity = [0, 0, 0]

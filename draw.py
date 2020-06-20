@@ -109,9 +109,9 @@ def drawRooms(self):
 def drawAgents(self):
 	indicesToDelete = []
 	for agentIndex in self.agents:
+		agent = self.agents[agentIndex]
 		#TODO add lane existence check
 		#TODO add negative speed check
-		agent = self.agents[agentIndex]
 		x1, y1 = self.G.nodes[agent.origin_node]['coordinates']
 		x2, y2 = self.G.nodes[agent.end_node]['coordinates']
 		laneWidth = self.G.edges[agent.origin_node, agent.end_node]['laneWidth']
@@ -133,6 +133,9 @@ def drawAgents(self):
 		self.draw.circle(self.screen, self.AGENT_COLOR, (x3, y3), int(laneWidth/2))
 
 		agent.distance += agent.speed/self.fps
+		agent.size = int(laneWidth/2)
+		agent.x = x3
+		agent.y = y3
 
 		maxdist = np.linalg.norm((y2-y1, x2-x1))
 
