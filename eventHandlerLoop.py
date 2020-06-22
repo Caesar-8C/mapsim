@@ -24,9 +24,11 @@ def eventHandlerLoop(self):
 			rel = self.mouseScale(event.rel)
 		if event.type == pyg.MOUSEMOTION and not self.activeNode == False:
 			self.G.nodes[self.activeNode]['coordinates'] = tupleSum(self.G.nodes[self.activeNode]['coordinates'], rel)
+			self.recalculateEdgeLengths()
 		if event.type == pyg.MOUSEMOTION and not self.activeEdge == False:
 			self.G.nodes[self.activeEdge[0]]['coordinates'] = tupleSum(self.G.nodes[self.activeEdge[0]]['coordinates'], rel)
 			self.G.nodes[self.activeEdge[1]]['coordinates'] = tupleSum(self.G.nodes[self.activeEdge[1]]['coordinates'], rel)
+			self.recalculateEdgeLengths()
 
 		if event.type == pyg.MOUSEMOTION and self.activeBackground == True:
 			self.draw.shift = tupleSum(self.draw.shift, rel)
@@ -55,7 +57,7 @@ def eventHandlerLoop(self):
 
 		if event.type == pyg.KEYDOWN:
 			if event.key == pyg.K_k:
-				self.saveGraph('data/graph2.txt')
+				self.saveGraph('data/graph.txt')
 
 
 		if event.type == self.AGENT1:

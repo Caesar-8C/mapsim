@@ -6,6 +6,9 @@ def tupleSum(t1, t2):
 def tupleSubtract(t1, t2):
 	return (t1[0] - t2[0], t1[1] - t2[1])
 
+def tupleDistance(t1, t2):
+	return np.linalg.norm(tupleSubtract(t1, t2))
+
 def between(a, b, c):
 	if b > c:
 		if b > a and a > c:
@@ -40,6 +43,9 @@ class Robot:
 		self.y = y
 		self.theta = 0
 
+		self.node = None
+		self.edge = None
+
 		self.map = map
 		self.velocity = [0, 0, 0]
 		self.maxVelocity = [100./self.map.fps, 100./self.map.fps, 150./self.map.fps] # pixels per second
@@ -63,6 +69,7 @@ class Robot:
 			y = self.y + np.sin(i)*self.map.ROBOT_SIZE
 			if not self.mapCollisionCheck((x, y)):
 				self.reset()
+				break
 
 
 	def changeVelocity(self, velocity, controlAction, maxVelocity):
@@ -77,15 +84,17 @@ class Robot:
 		pos = (self.x, self.y)
 		for agent in self.map.agents:
 			agent_pos = (self.map.agents[agent].x, self.map.agents[agent].y)
-			dist = np.linalg.norm(tupleSubtract(agent_pos, pos))
+			dist = tupleDistance(agent_pos, pos)
 			if dist < self.map.agents[agent].size + self.map.ROBOT_SIZE:
 				return False
 		return True
 
 	def mapCollisionCheck(self, pos):
 		for node in self.map.G.nodes:
-			dist = np.linalg.norm(tupleSubtract(self.map.G.nodes[node]['coordinates'], pos))
+			dist = tupleDistance(self.map.G.nodes[node]['coordinates'], pos)
 			if dist < self.map.NODE_SIZE:
+				self.node = node # TODO fix
+				self.edge = None
 				return True
 
 		for edge in self.map.G.edges:
@@ -108,6 +117,8 @@ class Robot:
 			AD = tupleSubtract((x6, y6), (x3, y3))
 
 			if 0<np.dot(AM,AB) and np.dot(AM,AB)<np.dot(AB,AB) and 0<np.dot(AM,AD) and np.dot(AM,AD)<np.dot(AD,AD):
+				self.node = None
+				self.edge = edge
 				return True
 
 		return False

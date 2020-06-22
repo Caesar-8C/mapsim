@@ -6,7 +6,7 @@ class Draw:
 		self.scale = scale
 		self.shift = shift
 
-	def line(self, surface, color, start_pos, end_pos, width):
+	def line(self, surface, color, start_pos, end_pos, width=1):
 		start_pos = (int((start_pos[0]+self.shift[0]) * self.scale), int((start_pos[1]+self.shift[1]) * self.scale))
 		end_pos = (int((end_pos[0]+self.shift[0]) * self.scale), int((end_pos[1]+self.shift[1]) * self.scale))
 		pyg.draw.line(surface, color, start_pos, end_pos, width)
@@ -144,6 +144,26 @@ def drawAgents(self):
 
 	for i in indicesToDelete:
 		del self.agents[i]
+
+def drawNodePath(self):
+	x1, y1 = self.G.nodes[self.rooms[self.target].start]['coordinates']
+	x2, y2 = self.G.nodes[self.rooms[self.target].end]['coordinates']
+	width = self.G.edges[self.rooms[self.target].start, self.rooms[self.target].end]['width']
+
+	angleAcross = np.arctan2(x1-x2, y2-y1)
+	angleAlong = np.arctan2(y1-y2, x1-x2)
+	dist = self.rooms[self.target].distance
+	x3 = x1 + np.cos(angleAlong)*dist - np.sign(dist)*np.cos(angleAcross)*width/2 + np.cos(angleAlong)*10
+	y3 = y1 + np.sin(angleAlong)*dist - np.sign(dist)*np.sin(angleAcross)*width/2 + np.sin(angleAlong)*10
+
+	if len(self.nodePath) == 0:
+		self.draw.line(self.screen, self.PATH_COLOR, (self.robot.x, self.robot.y), (x3, y3), 2)
+	else:
+		self.draw.line(self.screen, self.PATH_COLOR, (self.robot.x, self.robot.y), self.G.nodes[self.nodePath[0]]['coordinates'], 2)
+		self.draw.line(self.screen, self.PATH_COLOR, self.G.nodes[self.nodePath[-1]]['coordinates'], (x3, y3), 2)
+
+		for i in range(1, len(self.nodePath)):
+			self.draw.line(self.screen, self.PATH_COLOR, self.G.nodes[self.nodePath[i-1]]['coordinates'], self.G.nodes[self.nodePath[i]]['coordinates'], 2)
 
 def drawRobot(self):
 	self.draw.circle(self.screen, self.ROBOT_COLOR, (self.robot.x, self.robot.y), self.ROBOT_SIZE)
