@@ -45,6 +45,7 @@ class Robot:
 
 		self.node = None
 		self.edge = None
+		self.edge_candidates = None
 
 		self.map = map
 		self.velocity = [0, 0, 0]
@@ -70,6 +71,7 @@ class Robot:
 			if not self.mapCollisionCheck((x, y)):
 				self.reset()
 				break
+			self.mapLocate()
 
 
 	def changeVelocity(self, velocity, controlAction, maxVelocity):
@@ -93,8 +95,6 @@ class Robot:
 		for node in self.map.G.nodes:
 			dist = tupleDistance(self.map.G.nodes[node]['coordinates'], pos)
 			if dist < self.map.NODE_SIZE:
-				self.node = node # TODO fix
-				self.edge = None
 				return True
 
 		for edge in self.map.G.edges:
@@ -117,11 +117,47 @@ class Robot:
 			AD = tupleSubtract((x6, y6), (x3, y3))
 
 			if 0<np.dot(AM,AB) and np.dot(AM,AB)<np.dot(AB,AB) and 0<np.dot(AM,AD) and np.dot(AM,AD)<np.dot(AD,AD):
-				self.node = None
-				self.edge = edge
 				return True
 
 		return False
+
+
+	def mapLocate(self):
+		pos = (self.x, self.y)
+
+		self.node = None
+		self.edge = None
+		self.edge_candidates = []
+
+		for node in self.map.G.nodes:
+			dist = tupleDistance(self.map.G.nodes[node]['coordinates'], pos)
+			if dist < self.map.NODE_SIZE:
+				self.node = node
+
+		for edge in self.map.G.edges:
+			x1, y1 = self.map.G.nodes[edge[0]]['coordinates']
+			x2, y2 = self.map.G.nodes[edge[1]]['coordinates']
+			halfWidth = max(self.map.G.edges[edge[0], edge[1]]['width']/2, self.map.MIN_CLICKABLE_CORRIDOR_WIDTH/2)
+
+			angle = np.arctan2(x1-x2, y2-y1)
+			x3 = x1 + np.cos(angle)*halfWidth
+			y3 = y1 + np.sin(angle)*halfWidth
+
+			x4 = x1 - np.cos(angle)*halfWidth
+			y4 = y1 - np.sin(angle)*halfWidth
+
+			x6 = x2 + np.cos(angle)*halfWidth
+			y6 = y2 + np.sin(angle)*halfWidth
+
+			AM = tupleSubtract(pos, (x3, y3))
+			AB = tupleSubtract((x4, y4), (x3, y3))
+			AD = tupleSubtract((x6, y6), (x3, y3))
+
+			if 0<np.dot(AM,AB) and np.dot(AM,AB)<np.dot(AB,AB) and 0<np.dot(AM,AD) and np.dot(AM,AD)<np.dot(AD,AD):
+				self.edge_candidates.append(edge)
+
+		if self.node == None and len(self.edge_candidates) == 1:
+			self.edge = self.edge_candidates[0]
 
 
 	def reset(self):

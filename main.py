@@ -10,6 +10,7 @@ class Map:
 	from eventHandlerLoop import eventHandlerLoop, mouseScale, mouseDescale
 	from draw import drawNodes, drawCorridors, drawLanes, drawRooms, drawAgents, drawNodePath, drawRobot
 	from fileManager import loadGraph, saveGraph
+	from pathPlanning import computeNodePathDistance, calculateNodePath, calculateWaypointPath
 
 	def __init__(self):
 		self.G = nx.Graph() # removed Di, TODO test
@@ -117,57 +118,6 @@ class Map:
 				return
 
 		self.activeBackground = True
-
-	def computeNodePathDistance(self, path):
-		sum = 0
-		for i in range(1, len(path)):
-			sum += self.G.edges[path[i-1], path[i]]['length']
-		return sum
-
-	def calculateNodePath(self):
-		pathMap = nx.shortest_path(self.G, weight='length', method='dijkstra')
-		targetEdge = (self.rooms[self.target].start, self.rooms[self.target].end)
-
-		if self.robot.node != None:
-			paths = []
-			paths.append(pathMap[self.robot.node][targetEdge[0]])
-			paths.append(pathMap[self.robot.node][targetEdge[1]])
-
-			dists = []
-			dists.append(int(self.computeNodePathDistance(paths[0])) + abs(self.rooms[self.target].distance))
-			dists.append(int(self.computeNodePathDistance(paths[1])) + self.G.edges[targetEdge]['length'] - abs(self.rooms[self.target].distance))
-
-			self.nodePath = paths[np.argmin(dists)]
-
-		elif self.robot.edge != None:
-
-			if self.robot.edge == targetEdge:
-				self.nodePath = []
-			else:
-				paths = []
-				paths.append(pathMap[self.robot.edge[0]][targetEdge[0]])
-				paths.append(pathMap[self.robot.edge[0]][targetEdge[1]])
-				paths.append(pathMap[self.robot.edge[1]][targetEdge[0]])
-				paths.append(pathMap[self.robot.edge[1]][targetEdge[1]])
-
-				dists = []
-				dists.append(int(self.computeNodePathDistance(paths[0]) + tupleDistance(self.G.nodes[self.robot.edge[0]]['coordinates'], (self.robot.x, self.robot.y))) + abs(self.rooms[self.target].distance))
-				dists.append(int(self.computeNodePathDistance(paths[1]) + tupleDistance(self.G.nodes[self.robot.edge[0]]['coordinates'], (self.robot.x, self.robot.y))) + self.G.edges[targetEdge]['length'] - abs(self.rooms[self.target].distance))
-				dists.append(int(self.computeNodePathDistance(paths[2]) + tupleDistance(self.G.nodes[self.robot.edge[1]]['coordinates'], (self.robot.x, self.robot.y))) + abs(self.rooms[self.target].distance))
-				dists.append(int(self.computeNodePathDistance(paths[3]) + tupleDistance(self.G.nodes[self.robot.edge[1]]['coordinates'], (self.robot.x, self.robot.y))) + self.G.edges[targetEdge]['length'] - abs(self.rooms[self.target].distance))
-
-				self.nodePath = paths[np.argmin(dists)]
-
-
-	def calculateWaypointPath(self):
-		start = (self.robot.x, self.robot.y)
-		self.waypointPath = [start]
-		for node in self.nodePath:
-			self.waypointPath.append(self.G.nodes[node]['coordinates'])
-
-		# for node in self.nodePath:
-		# 	dist = tupleDistance(self.G.nodes[node]['coordinates'], self.waypointPath[-1])
-		# 	if dist > self.WAYPOINT_DISTANCE:
 
 
 	def main(self):
