@@ -92,33 +92,10 @@ class Robot:
 		return True
 
 	def mapCollisionCheck(self, pos):
-		for node in self.map.G.nodes:
-			dist = tupleDistance(self.map.G.nodes[node]['coordinates'], pos)
-			if dist < self.map.NODE_SIZE:
-				return True
-
-		for edge in self.map.G.edges:
-			x1, y1 = self.map.G.nodes[edge[0]]['coordinates']
-			x2, y2 = self.map.G.nodes[edge[1]]['coordinates']
-			halfWidth = max(self.map.G.edges[edge[0], edge[1]]['width']/2, self.map.MIN_CLICKABLE_CORRIDOR_WIDTH/2)
-
-			angle = np.arctan2(x1-x2, y2-y1)
-			x3 = x1 + np.cos(angle)*halfWidth
-			y3 = y1 + np.sin(angle)*halfWidth
-
-			x4 = x1 - np.cos(angle)*halfWidth
-			y4 = y1 - np.sin(angle)*halfWidth
-
-			x6 = x2 + np.cos(angle)*halfWidth
-			y6 = y2 + np.sin(angle)*halfWidth
-
-			AM = tupleSubtract(pos, (x3, y3))
-			AB = tupleSubtract((x4, y4), (x3, y3))
-			AD = tupleSubtract((x6, y6), (x3, y3))
-
-			if 0<np.dot(AM,AB) and np.dot(AM,AB)<np.dot(AB,AB) and 0<np.dot(AM,AD) and np.dot(AM,AD)<np.dot(AD,AD):
-				return True
-
+		if self.map.insideNodeCheck(pos, self.map.NODE_SIZE) != None:
+			return True
+		if len(self.map.insideEdgeCheck(pos)) > 0:
+			return True
 		return False
 
 
@@ -129,32 +106,8 @@ class Robot:
 		self.edge = None
 		self.edge_candidates = []
 
-		for node in self.map.G.nodes:
-			dist = tupleDistance(self.map.G.nodes[node]['coordinates'], pos)
-			if dist < self.map.NODE_SIZE:
-				self.node = node
-
-		for edge in self.map.G.edges:
-			x1, y1 = self.map.G.nodes[edge[0]]['coordinates']
-			x2, y2 = self.map.G.nodes[edge[1]]['coordinates']
-			halfWidth = max(self.map.G.edges[edge[0], edge[1]]['width']/2, self.map.MIN_CLICKABLE_CORRIDOR_WIDTH/2)
-
-			angle = np.arctan2(x1-x2, y2-y1)
-			x3 = x1 + np.cos(angle)*halfWidth
-			y3 = y1 + np.sin(angle)*halfWidth
-
-			x4 = x1 - np.cos(angle)*halfWidth
-			y4 = y1 - np.sin(angle)*halfWidth
-
-			x6 = x2 + np.cos(angle)*halfWidth
-			y6 = y2 + np.sin(angle)*halfWidth
-
-			AM = tupleSubtract(pos, (x3, y3))
-			AB = tupleSubtract((x4, y4), (x3, y3))
-			AD = tupleSubtract((x6, y6), (x3, y3))
-
-			if 0<np.dot(AM,AB) and np.dot(AM,AB)<np.dot(AB,AB) and 0<np.dot(AM,AD) and np.dot(AM,AD)<np.dot(AD,AD):
-				self.edge_candidates.append(edge)
+		self.node = self.map.insideNodeCheck(pos, self.map.NODE_SIZE)
+		self.edge_candidates = self.map.insideEdgeCheck(pos)
 
 		if self.node == None and len(self.edge_candidates) == 1:
 			self.edge = self.edge_candidates[0]

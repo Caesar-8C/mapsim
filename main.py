@@ -1,3 +1,5 @@
+import os
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 import numpy as np
 import pygame as pyg
 import networkx as nx
@@ -88,16 +90,32 @@ class Map:
 		self.activeBackground = False
 
 	def activateElement(self, pos):
+		node = self.insideNodeCheck(pos, self.NODE_CORE_SIZE)
+		if node != None:
+			self.activeNode = node
+			return
+
+		edge_candidates = self.insideEdgeCheck(pos)
+		if len(edge_candidates) > 0:
+			self.activeEdge = edge_candidates[0]
+			return
+
+		self.activeBackground = True
+
+	def insideNodeCheck(self, pos, size):
 		for node in self.G.nodes:
 			dist = tupleDistance(self.G.nodes[node]['coordinates'], pos)
-			if dist < self.NODE_CORE_SIZE:
-				self.activeNode = node
-				return
+			if dist < size:
+				return node
+		return None
+
+	def insideEdgeCheck(self, pos):
+		edge_candidates = []
 
 		for edge in self.G.edges:
 			x1, y1 = self.G.nodes[edge[0]]['coordinates']
 			x2, y2 = self.G.nodes[edge[1]]['coordinates']
-			halfWidth = max(self.G.edges[edge[0], edge[1]]['width']/2, self.MIN_CLICKABLE_CORRIDOR_WIDTH/2)
+			halfWidth = self.G.edges[edge[0], edge[1]]['width']/2
 
 			angle = np.arctan2(x1-x2, y2-y1)
 			x3 = x1 + np.cos(angle)*halfWidth
@@ -114,11 +132,9 @@ class Map:
 			AD = tupleSubtract((x6, y6), (x3, y3))
 
 			if 0<np.dot(AM,AB) and np.dot(AM,AB)<np.dot(AB,AB) and 0<np.dot(AM,AD) and np.dot(AM,AD)<np.dot(AD,AD):
-				self.activeEdge = edge
-				return
+				edge_candidates.append(edge)
 
-		self.activeBackground = True
-
+		return edge_candidates
 
 	def main(self):
 		while True:
