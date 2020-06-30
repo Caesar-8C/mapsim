@@ -156,9 +156,9 @@ class Map:
 			self.drawRobot()
 
 
-			# c = self.getLaneCoordinates(self.robot.edge)
-			# if c != None:
-			# 	self.draw.circle(self.screen, (200, 100, 100), c, 5)
+			if self.robot.edge != None:
+				c = self.getLaneCoordinates(self.robot.edge, self.robot.distance)
+				self.draw.circle(self.screen, (200, 100, 100), c, 5)
 
 
 			pyg.display.flip()

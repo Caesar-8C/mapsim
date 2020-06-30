@@ -24,17 +24,17 @@ def calculateNodePath(self):
 
 		self.nodePath = paths[np.argmin(dists)]
 
-		if len(self.nodePath) > 1:
+		if len(self.nodePath) > 1: # TODO simplify?
 			for edge in self.robot.edge_candidates:
 				if self.nodePath[1] in edge:
 					self.robot.node = None
-					self.robot.edge = edge
+					self.robot.setEdge(edge)
 					del self.nodePath[0]
 		else:
 			for edge in self.robot.edge_candidates:
 				if edge == targetEdge:
 					self.robot.node = None
-					self.robot.edge = edge
+					self.robot.setEdge(edge)
 					del self.nodePath[0]
 
 	elif self.robot.edge != None:
@@ -89,7 +89,6 @@ def getLaneCoordinates(self, edge, distanceAlong=0, laneIndex=1):
 	angleAlong = np.arctan2(y1-y2, x1-x2)
 
 	distanceAcross = (laneIndex + 0.5) * self.G.edges[edge]['laneWidth'] - halfWidth
-	# distanceAlong = self.G.edges[edge]['length']/2 # for testing purposes
 
 	x3 = x1 + np.cos(angleAcross)*distanceAcross - np.cos(angleAlong)*distanceAlong
 	y3 = y1 + np.sin(angleAcross)*distanceAcross - np.sin(angleAlong)*distanceAlong

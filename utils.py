@@ -74,10 +74,6 @@ class Robot:
 				break
 
 		self.mapLocate()
-		if self.edge != None:
-			self.distance = self.computeCorridorDistance()
-		else:
-			self.distance = None
 
 
 	def changeVelocity(self, velocity, controlAction, maxVelocity):
@@ -109,14 +105,14 @@ class Robot:
 		pos = (self.x, self.y)
 
 		self.node = None
-		self.edge = None
+		self.setEdge(None)
 		self.edge_candidates = []
 
 		self.node = self.map.insideNodeCheck(pos, self.map.NODE_SIZE)
 		self.edge_candidates = self.map.insideEdgeCheck(pos)
 
 		if self.node == None and len(self.edge_candidates) == 1:
-			self.edge = self.edge_candidates[0]
+			self.setEdge(self.edge_candidates[0])
 
 		if self.node == None and self.edge == None and len(self.edge_candidates) > 1:
 			for node in self.edge_candidates[0]:
@@ -125,8 +121,34 @@ class Robot:
 					break
 
 
+	def setEdge(self, edge):
+		if edge == None:
+			self.edge = None
+			self.distance = None
+		else:
+			self.edge = edge
+			self.distance = self.computeCorridorDistance()
+
+
 	def computeCorridorDistance(self):
-		return 0
+		R = (self.x, self.y)
+		A = self.map.G.nodes[self.edge[0]]['coordinates']
+		B = self.map.G.nodes[self.edge[1]]['coordinates']
+		dist = self.map.G.edges[self.edge]['length']
+
+		AR = tupleSubtract(R, A)
+		AB = tupleSubtract(B, A)
+		return int(np.dot(AR, AB)/dist)
+
+
+	def getClosestWaypoint(self): # to planning
+		pos = (self.x, self.y)
+		laneNum = self.map.G.edges[self.edge]['lanes']
+		lanes = []
+
+		for i in range(len(laneNum)):
+			point = tupleDistance(pos, )
+		return 10
 
 
 	def reset(self):
