@@ -24,11 +24,18 @@ def calculateNodePath(self):
 
 		self.nodePath = paths[np.argmin(dists)]
 
-		for edge in self.robot.edge_candidates: # TODO Fix for len(self.nodePath) < 2
-			if self.nodePath[1] in edge:
-				self.robot.node = None
-				self.robot.edge = edge
-				del self.nodePath[0]
+		if len(self.nodePath) > 1:
+			for edge in self.robot.edge_candidates:
+				if self.nodePath[1] in edge:
+					self.robot.node = None
+					self.robot.edge = edge
+					del self.nodePath[0]
+		else:
+			for edge in self.robot.edge_candidates:
+				if edge == targetEdge:
+					self.robot.node = None
+					self.robot.edge = edge
+					del self.nodePath[0]
 
 	elif self.robot.edge != None:
 		if self.robot.edge != targetEdge:
