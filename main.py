@@ -12,7 +12,7 @@ class Map:
 	from eventHandlerLoop import eventHandlerLoop, mouseScale, mouseDescale
 	from draw import drawNodes, drawCorridors, drawLanes, drawRooms, drawAgents, drawNodePath, drawRobot
 	from fileManager import loadGraph, saveGraph
-	from pathPlanning import computeNodePathDistance, calculateNodePath, calculateWaypointPath
+	from pathPlanning import computeNodePathDistance, calculateNodePath, calculateWaypointPath, getLaneCoordinates
 
 	def __init__(self):
 		self.G = nx.Graph() # removed Di, TODO test
@@ -154,6 +154,11 @@ class Map:
 			self.drawAgents()
 			self.drawNodePath()
 			self.drawRobot()
+
+
+			# c = self.getLaneCoordinates(self.robot.edge)
+			# if c != None:
+			# 	self.draw.circle(self.screen, (200, 100, 100), c, 5)
 
 
 			pyg.display.flip()

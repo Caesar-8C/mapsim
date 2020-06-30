@@ -38,18 +38,18 @@ def drawCorridors(self):
 		x2, y2 = self.G.nodes[corridor[1]]['coordinates']
 		halfWidth = self.G.edges[corridor[0], corridor[1]]['width']/2
 
-		angle = np.arctan2(x1-x2, y2-y1)
-		x3 = x1 + np.cos(angle)*halfWidth
-		y3 = y1 + np.sin(angle)*halfWidth
+		angleAcross = np.arctan2(x1-x2, y2-y1)
+		x3 = x1 + np.cos(angleAcross)*halfWidth
+		y3 = y1 + np.sin(angleAcross)*halfWidth
 
-		x4 = x1 - np.cos(angle)*halfWidth
-		y4 = y1 - np.sin(angle)*halfWidth
+		x4 = x1 - np.cos(angleAcross)*halfWidth
+		y4 = y1 - np.sin(angleAcross)*halfWidth
 
-		x5 = x2 - np.cos(angle)*halfWidth
-		y5 = y2 - np.sin(angle)*halfWidth
+		x5 = x2 - np.cos(angleAcross)*halfWidth
+		y5 = y2 - np.sin(angleAcross)*halfWidth
 
-		x6 = x2 + np.cos(angle)*halfWidth
-		y6 = y2 + np.sin(angle)*halfWidth
+		x6 = x2 + np.cos(angleAcross)*halfWidth
+		y6 = y2 + np.sin(angleAcross)*halfWidth
 
 		self.draw.polygon(self.screen, self.CORRIDOR_COLOR, ((x3, y3), (x4, y4), (x5, y5), (x6, y6)))
 		self.drawLanes(corridor[0], corridor[1])
@@ -67,9 +67,9 @@ def drawLanes(self, node, successor):
 	self.G.edges[node, successor]['laneWidth'] = laneWidth
 
 	if lanes > 1:
-		angleNorm = np.arctan2(x1-x2, y2-y1)
-		angleCos = np.cos(angleNorm)
-		angleSin = np.sin(angleNorm)
+		angleAcross = np.arctan2(x1-x2, y2-y1)
+		angleCos = np.cos(angleAcross)
+		angleSin = np.sin(angleAcross)
 
 		x3 = x1 + angleCos*width/2
 		y3 = y1 + angleSin*width/2

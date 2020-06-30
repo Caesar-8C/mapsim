@@ -42,6 +42,7 @@ class Robot:
 		self.x = x
 		self.y = y
 		self.theta = 0
+		self.distance = None
 
 		self.node = None
 		self.edge = None
@@ -71,7 +72,12 @@ class Robot:
 			if not self.mapCollisionCheck((x, y)):
 				self.reset()
 				break
-			self.mapLocate()
+
+		self.mapLocate()
+		if self.edge != None:
+			self.distance = self.computeCorridorDistance()
+		else:
+			self.distance = None
 
 
 	def changeVelocity(self, velocity, controlAction, maxVelocity):
@@ -111,6 +117,16 @@ class Robot:
 
 		if self.node == None and len(self.edge_candidates) == 1:
 			self.edge = self.edge_candidates[0]
+
+		if self.node == None and self.edge == None and len(self.edge_candidates) > 1:
+			for node in self.edge_candidates[0]:
+				if node in self.edge_candidates[1]:
+					self.node = node
+					break
+
+
+	def computeCorridorDistance(self):
+		return 0
 
 
 	def reset(self):
