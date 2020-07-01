@@ -145,7 +145,7 @@ def drawAgents(self):
 	for i in indicesToDelete:
 		del self.agents[i]
 
-def drawNodePath(self):
+def drawPath(self, path): # TODO fix for nodepath
 	x1, y1 = self.G.nodes[self.rooms[self.target].start]['coordinates']
 	x2, y2 = self.G.nodes[self.rooms[self.target].end]['coordinates']
 	width = self.G.edges[self.rooms[self.target].start, self.rooms[self.target].end]['width']
@@ -156,14 +156,18 @@ def drawNodePath(self):
 	x3 = x1 + np.cos(angleAlong)*dist - np.sign(dist)*np.cos(angleAcross)*width/2 + np.cos(angleAlong)*10
 	y3 = y1 + np.sin(angleAlong)*dist - np.sign(dist)*np.sin(angleAcross)*width/2 + np.sin(angleAlong)*10
 
-	if len(self.nodePath) == 0:
+	if len(path) == 0:
 		self.draw.line(self.screen, self.PATH_COLOR, (self.robot.x, self.robot.y), (x3, y3), 2)
 	else:
-		self.draw.line(self.screen, self.PATH_COLOR, (self.robot.x, self.robot.y), self.G.nodes[self.nodePath[0]]['coordinates'], 2)
-		self.draw.line(self.screen, self.PATH_COLOR, self.G.nodes[self.nodePath[-1]]['coordinates'], (x3, y3), 2)
+		self.draw.line(self.screen, self.PATH_COLOR, (self.robot.x, self.robot.y), path[0], 2)
+		self.draw.line(self.screen, self.PATH_COLOR, path[-1], (x3, y3), 2)
 
-		for i in range(1, len(self.nodePath)):
-			self.draw.line(self.screen, self.PATH_COLOR, self.G.nodes[self.nodePath[i-1]]['coordinates'], self.G.nodes[self.nodePath[i]]['coordinates'], 2)
+		for i in range(1, len(path)):
+			self.draw.line(self.screen, self.PATH_COLOR, path[i-1], path[i], 2)
+
+def drawWaypoints(self):
+	for point in self.waypointPath:
+		self.draw.circle(self.screen, self.WAYPOINT_COLOR, point, 5)
 
 def drawRobot(self):
 	self.draw.circle(self.screen, self.ROBOT_COLOR, (self.robot.x, self.robot.y), self.ROBOT_SIZE)

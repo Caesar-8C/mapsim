@@ -10,9 +10,10 @@ from draw import Draw
 
 class Map:
 	from eventHandlerLoop import eventHandlerLoop, mouseScale, mouseDescale
-	from draw import drawNodes, drawCorridors, drawLanes, drawRooms, drawAgents, drawNodePath, drawRobot
+	from draw import drawNodes, drawCorridors, drawLanes, drawRooms, drawAgents, drawPath, drawWaypoints, drawRobot
 	from fileManager import loadGraph, saveGraph
-	from pathPlanning import computeNodePathDistance, calculateNodePath, calculateWaypointPath, getLaneCoordinates
+	from pathPlanning import 	computeNodePathDistance, calculateNodePath, calculateWaypointPath,\
+								addEdgeWaypoints, addTargetWaypoints, removeWaypointOverlap, getLaneCoordinates, getClosestLane
 
 	def __init__(self):
 		self.G = nx.Graph() # removed Di, TODO test
@@ -50,6 +51,7 @@ class Map:
 		self.AGENT_COLOR = (0, 0, 100)
 		self.ROOM_COLOR = (255, 0, 0)
 		self.PATH_COLOR = (128, 0, 128)
+		self.WAYPOINT_COLOR = (200, 100, 100)
 		self.WAYPOINT_DISTANCE = 10
 
 		self.AGENT1 = pyg.USEREVENT+1
@@ -142,7 +144,7 @@ class Map:
 			
 			self.robot.move(self.controlAction)
 			self.calculateNodePath()
-			# self.calculateWaypointPath()
+			self.calculateWaypointPath()
 			self.eventHandlerLoop()
 			
 
@@ -152,13 +154,9 @@ class Map:
 			self.drawNodes(radius=self.NODE_CORE_SIZE)
 			self.drawRooms()
 			self.drawAgents()
-			self.drawNodePath()
+			self.drawPath(self.waypointPath)
+			self.drawWaypoints()
 			self.drawRobot()
-
-
-			if self.robot.edge != None:
-				c = self.getLaneCoordinates(self.robot.edge, self.robot.distance)
-				self.draw.circle(self.screen, (200, 100, 100), c, 5)
 
 
 			pyg.display.flip()

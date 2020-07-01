@@ -43,6 +43,7 @@ class Robot:
 		self.y = y
 		self.theta = 0
 		self.distance = None
+		self.lane = None
 
 		self.node = None
 		self.edge = None
@@ -139,16 +140,6 @@ class Robot:
 		AR = tupleSubtract(R, A)
 		AB = tupleSubtract(B, A)
 		return int(np.dot(AR, AB)/dist)
-
-
-	def getClosestWaypoint(self): # to planning
-		pos = (self.x, self.y)
-		laneNum = self.map.G.edges[self.edge]['lanes']
-		lanes = []
-
-		for i in range(len(laneNum)):
-			point = tupleDistance(pos, )
-		return 10
 
 
 	def reset(self):
