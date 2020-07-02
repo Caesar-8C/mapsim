@@ -58,6 +58,9 @@ def eventHandlerLoop(self):
 		if event.type == pyg.KEYDOWN:
 			if event.key == pyg.K_k:
 				self.saveGraph('data/graph.txt')
+			if event.key == pyg.K_l:
+				self.loadGraph('data/graph2.txt')
+
 
 
 		if event.type == self.AGENT1:

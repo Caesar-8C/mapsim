@@ -73,9 +73,10 @@ def calculateWaypointPath(self):
 				self.removeWaypointOverlap(index)
 				break
 	
-	index = len(self.waypointPath)-1
-	self.addTargetWaypoints(self.nodePath[-1])
-	self.removeWaypointOverlap(index)
+	if len(self.nodePath) != 0:
+		index = len(self.waypointPath)-1
+		self.addTargetWaypoints(self.nodePath[-1])
+		self.removeWaypointOverlap(index)
 
 
 def addEdgeWaypoints(self, edge, node):

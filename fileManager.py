@@ -1,4 +1,8 @@
+import networkx as nx
+
 def loadGraph(self, file):
+	self.clearData()
+
 	f = open(file)
 	if f.closed:
 		print('file failed to open')
@@ -44,3 +48,9 @@ def saveGraph(self, file):
 		f.write('room '+str(room)+' '+str(self.rooms[room].start)+' '+str(self.rooms[room].end)+' '+str(self.rooms[room].distance)+'\n')
 
 	f.close()
+
+def clearData(self):
+	self.G = nx.Graph()
+	self.rooms = {}
+	self.agents = {}
+	self.robot.reset()

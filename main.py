@@ -11,7 +11,7 @@ from draw import Draw
 class Map:
 	from eventHandlerLoop import eventHandlerLoop, mouseScale, mouseDescale
 	from draw import drawNodes, drawCorridors, drawLanes, drawRooms, drawAgents, drawPath, drawWaypoints, drawRobot
-	from fileManager import loadGraph, saveGraph
+	from fileManager import loadGraph, saveGraph, clearData
 	from pathPlanning import 	computeNodePathDistance, calculateNodePath, calculateWaypointPath,\
 								addEdgeWaypoints, addTargetWaypoints, removeWaypointOverlap, getLaneCoordinates, getClosestLane
 
