@@ -1,5 +1,13 @@
 # Mapsim
 
+## Prerequisites
+
+Python3
+Modules used:
+pygame
+numpy
+networkx
+
 ## File structure
 #### main.py
 Main script that contains Map class that starts pygame, builds the graph and runs drawing of objects on the screen.
@@ -18,10 +26,3 @@ Extension of Map class that handles loading the map from a file and saving it ba
 
 #### data/graph2.txt
 Sample map description.
-
-## Prerequisites
-
-Modules used:
-pygame
-numpy
-networkx
