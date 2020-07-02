@@ -98,8 +98,8 @@ def drawRooms(self):
 		angleAcross = np.arctan2(x1-x2, y2-y1)
 		angleAlong = np.arctan2(y1-y2, x1-x2)
 		dist = self.rooms[roomNumber].distance
-		x3 = x1 + np.cos(angleAlong)*dist - np.sign(dist)*np.cos(angleAcross)*width/2
-		y3 = y1 + np.sin(angleAlong)*dist - np.sign(dist)*np.sin(angleAcross)*width/2
+		x3 = x1 + np.cos(angleAlong)*(dist-10) - np.sign(dist)*np.cos(angleAcross)*width/2
+		y3 = y1 + np.sin(angleAlong)*(dist-10) - np.sign(dist)*np.sin(angleAcross)*width/2
 
 		x4 = x3 + np.cos(angleAlong)*20
 		y4 = y3 + np.sin(angleAlong)*20
