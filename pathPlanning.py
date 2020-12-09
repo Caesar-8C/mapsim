@@ -8,15 +8,17 @@ def computeNodePathDistance(self, path):
 		sum += self.G.edges[path[i-1], path[i]]['length']
 	return sum
 
+def calculatePathMap(self):
+	self.pathMap = nx.shortest_path(self.G, weight='length', method='dijkstra')
+
 def calculateNodePath(self):
-	pathMap = nx.shortest_path(self.G, weight='length', method='dijkstra')
 	targetEdge = (self.rooms[self.target].start, self.rooms[self.target].end)
 	self.nodePath = []
 
 	if self.robot.node != None:
 		paths = []
-		paths.append(pathMap[self.robot.node][targetEdge[0]])
-		paths.append(pathMap[self.robot.node][targetEdge[1]])
+		paths.append(self.pathMap[self.robot.node][targetEdge[0]])
+		paths.append(self.pathMap[self.robot.node][targetEdge[1]])
 
 		dists = []
 		dists.append(int(self.computeNodePathDistance(paths[0])) + abs(self.rooms[self.target].distance))
@@ -40,10 +42,10 @@ def calculateNodePath(self):
 	elif self.robot.edge != None:
 		if self.robot.edge != targetEdge:
 			paths = []
-			paths.append(pathMap[self.robot.edge[0]][targetEdge[0]])
-			paths.append(pathMap[self.robot.edge[0]][targetEdge[1]])
-			paths.append(pathMap[self.robot.edge[1]][targetEdge[0]])
-			paths.append(pathMap[self.robot.edge[1]][targetEdge[1]])
+			paths.append(self.pathMap[self.robot.edge[0]][targetEdge[0]])
+			paths.append(self.pathMap[self.robot.edge[0]][targetEdge[1]])
+			paths.append(self.pathMap[self.robot.edge[1]][targetEdge[0]])
+			paths.append(self.pathMap[self.robot.edge[1]][targetEdge[1]])
 
 			dists = []
 			dists.append(int(self.computeNodePathDistance(paths[0]) + tupleDistance(self.G.nodes[self.robot.edge[0]]['coordinates'], (self.robot.x, self.robot.y))) + abs(self.rooms[self.target].distance))
@@ -190,12 +192,14 @@ def getLaneCoordinates(self, edge, distanceAlong=0, laneIndex=1):
 	x2, y2 = self.G.nodes[edge[1]]['coordinates']
 	halfWidth = self.G.edges[edge[0], edge[1]]['width']/2
 
-	angleAcross = np.arctan2(x1-x2, y2-y1)
-	angleAlong = np.arctan2(y1-y2, x1-x2)
+	sinAcross = self.G.edges[edge[0], edge[1]]['sinAcross']
+	cosAcross = self.G.edges[edge[0], edge[1]]['cosAcross']
+	sinAlong = self.G.edges[edge[0], edge[1]]['sinAlong']
+	cosAlong = self.G.edges[edge[0], edge[1]]['cosAlong']
 
 	distanceAcross = (laneIndex + 0.5) * self.G.edges[edge]['laneWidth'] - halfWidth
 
-	x3 = x1 + np.cos(angleAcross)*distanceAcross - np.cos(angleAlong)*distanceAlong
-	y3 = y1 + np.sin(angleAcross)*distanceAcross - np.sin(angleAlong)*distanceAlong
+	x3 = x1 + cosAcross*distanceAcross - cosAlong*distanceAlong
+	y3 = y1 + sinAcross*distanceAcross - sinAlong*distanceAlong
 
 	return (x3, y3)

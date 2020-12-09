@@ -38,18 +38,20 @@ def drawCorridors(self):
 		x2, y2 = self.G.nodes[corridor[1]]['coordinates']
 		halfWidth = self.G.edges[corridor[0], corridor[1]]['width']/2
 
-		angleAcross = np.arctan2(x1-x2, y2-y1)
-		x3 = x1 + np.cos(angleAcross)*halfWidth
-		y3 = y1 + np.sin(angleAcross)*halfWidth
+		sinAcross = self.G.edges[corridor[0], corridor[1]]['sinAcross']
+		cosAcross = self.G.edges[corridor[0], corridor[1]]['cosAcross']
 
-		x4 = x1 - np.cos(angleAcross)*halfWidth
-		y4 = y1 - np.sin(angleAcross)*halfWidth
+		x3 = x1 + cosAcross*halfWidth
+		y3 = y1 + sinAcross*halfWidth
 
-		x5 = x2 - np.cos(angleAcross)*halfWidth
-		y5 = y2 - np.sin(angleAcross)*halfWidth
+		x4 = x1 - cosAcross*halfWidth
+		y4 = y1 - sinAcross*halfWidth
 
-		x6 = x2 + np.cos(angleAcross)*halfWidth
-		y6 = y2 + np.sin(angleAcross)*halfWidth
+		x5 = x2 - cosAcross*halfWidth
+		y5 = y2 - sinAcross*halfWidth
+
+		x6 = x2 + cosAcross*halfWidth
+		y6 = y2 + sinAcross*halfWidth
 
 		self.draw.polygon(self.screen, self.CORRIDOR_COLOR, ((x3, y3), (x4, y4), (x5, y5), (x6, y6)))
 		self.drawLanes(corridor[0], corridor[1])
@@ -67,18 +69,17 @@ def drawLanes(self, node, successor):
 	self.G.edges[node, successor]['laneWidth'] = laneWidth
 
 	if lanes > 1:
-		angleAcross = np.arctan2(x1-x2, y2-y1)
-		angleCos = np.cos(angleAcross)
-		angleSin = np.sin(angleAcross)
+		sinAcross = self.G.edges[node, successor]['sinAcross']
+		cosAcross = self.G.edges[node, successor]['cosAcross']
 
-		x3 = x1 + angleCos*width/2
-		y3 = y1 + angleSin*width/2
+		x3 = x1 + cosAcross*width/2
+		y3 = y1 + sinAcross*width/2
 
-		x4 = x2 + angleCos*width/2
-		y4 = y2 + angleSin*width/2
+		x4 = x2 + cosAcross*width/2
+		y4 = y2 + sinAcross*width/2
 
-		xStep = angleCos*laneWidth
-		yStep = angleSin*laneWidth
+		xStep = cosAcross*laneWidth
+		yStep = sinAcross*laneWidth
 
 		for i in range(lanes-1):
 			x3 -= xStep
@@ -95,66 +96,38 @@ def drawRooms(self):
 		x2, y2 = self.G.nodes[self.rooms[roomNumber].end]['coordinates']
 		width = self.G.edges[self.rooms[roomNumber].start, self.rooms[roomNumber].end]['width']
 
-		angleAcross = np.arctan2(x1-x2, y2-y1)
-		angleAlong = np.arctan2(y1-y2, x1-x2)
-		dist = self.rooms[roomNumber].distance
-		x3 = x1 + np.cos(angleAlong)*(dist-10) - np.sign(dist)*np.cos(angleAcross)*width/2
-		y3 = y1 + np.sin(angleAlong)*(dist-10) - np.sign(dist)*np.sin(angleAcross)*width/2
+		sinAcross = self.G.edges[self.rooms[roomNumber].start, self.rooms[roomNumber].end]['sinAcross']
+		cosAcross = self.G.edges[self.rooms[roomNumber].start, self.rooms[roomNumber].end]['cosAcross']
+		sinAlong = self.G.edges[self.rooms[roomNumber].start, self.rooms[roomNumber].end]['sinAlong']
+		cosAlong = self.G.edges[self.rooms[roomNumber].start, self.rooms[roomNumber].end]['cosAlong']
 
-		x4 = x3 + np.cos(angleAlong)*20
-		y4 = y3 + np.sin(angleAlong)*20
+		dist = self.rooms[roomNumber].distance
+		x3 = x1 + cosAlong*(dist-10) - np.sign(dist)*cosAcross*width/2
+		y3 = y1 + sinAlong*(dist-10) - np.sign(dist)*sinAcross*width/2
+
+		x4 = x3 + cosAlong*20
+		y4 = y3 + sinAlong*20
 
 		self.draw.line(self.screen, self.ROOM_COLOR, (x3, y3), (x4, y4), 3)
 
 def drawAgents(self):
-	indicesToDelete = []
 	for agentIndex in self.agents:
 		agent = self.agents[agentIndex]
-		#TODO add lane existence check
-		#TODO add negative speed check
-		x1, y1 = self.G.nodes[agent.origin_node]['coordinates']
-		x2, y2 = self.G.nodes[agent.end_node]['coordinates']
-		laneWidth = self.G.edges[agent.origin_node, agent.end_node]['laneWidth']
-		width = self.G.edges[agent.origin_node, agent.end_node]['width']
-
-		angleAcross = np.arctan2(x1-x2, y2-y1)
-		angleAlong = np.arctan2(y1-y2, x1-x2)
-
-		x3 = int(np.cos(angleAcross)*(width/2 - agent.lane*laneWidth - laneWidth/2) - np.cos(angleAlong)*agent.distance)
-		y3 = int(np.sin(angleAcross)*(width/2 - agent.lane*laneWidth - laneWidth/2) - np.sin(angleAlong)*agent.distance)
-
-		if agent.speed > 0:
-			x3 += x1
-			y3 += y1
-		else:
-			x3 += x2
-			y3 += y2
-
-		self.draw.circle(self.screen, self.AGENT_COLOR, (x3, y3), int(laneWidth/2))
-
-		agent.distance += agent.speed/self.fps
-		agent.size = int(laneWidth/2)
-		agent.x = x3
-		agent.y = y3
-
-		maxdist = np.linalg.norm((y2-y1, x2-x1))
-
-		if np.abs(agent.distance) >= maxdist:
-			indicesToDelete.append(agentIndex)
-
-	for i in indicesToDelete:
-		del self.agents[i]
+		self.draw.circle(self.screen, self.AGENT_COLOR, agent.coordinates, agent.radius)
 
 def drawPath(self, path): # TODO fix for nodepath
 	x1, y1 = self.G.nodes[self.rooms[self.target].start]['coordinates']
 	x2, y2 = self.G.nodes[self.rooms[self.target].end]['coordinates']
 	width = self.G.edges[self.rooms[self.target].start, self.rooms[self.target].end]['width']
 
-	angleAcross = np.arctan2(x1-x2, y2-y1)
-	angleAlong = np.arctan2(y1-y2, x1-x2)
+	sinAcross = self.G.edges[self.rooms[self.target].start, self.rooms[self.target].end]['sinAcross']
+	cosAcross = self.G.edges[self.rooms[self.target].start, self.rooms[self.target].end]['cosAcross']
+	sinAlong = self.G.edges[self.rooms[self.target].start, self.rooms[self.target].end]['sinAlong']
+	cosAlong = self.G.edges[self.rooms[self.target].start, self.rooms[self.target].end]['cosAlong']
+
 	dist = self.rooms[self.target].distance
-	x3 = x1 + np.cos(angleAlong)*dist - np.sign(dist)*np.cos(angleAcross)*width/2 + np.cos(angleAlong)*10
-	y3 = y1 + np.sin(angleAlong)*dist - np.sign(dist)*np.sin(angleAcross)*width/2 + np.sin(angleAlong)*10
+	x3 = x1 + cosAlong*dist - np.sign(dist)*cosAcross*width/2 + cosAlong*10
+	y3 = y1 + sinAlong*dist - np.sign(dist)*sinAcross*width/2 + sinAlong*10
 
 	if len(path) == 0:
 		self.draw.line(self.screen, self.PATH_COLOR, (self.robot.x, self.robot.y), (x3, y3), 2)

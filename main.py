@@ -13,7 +13,8 @@ class Map:
 	from draw import drawNodes, drawCorridors, drawLanes, drawRooms, drawAgents, drawPath, drawWaypoints, drawRobot
 	from fileManager import loadGraph, saveGraph, clearData
 	from pathPlanning import 	computeNodePathDistance, calculateNodePath, calculateWaypointPath,\
-								addEdgeWaypoints, addTargetWaypoints, removeWaypointOverlap, getLaneCoordinates, getClosestLane
+								addEdgeWaypoints, addTargetWaypoints, removeWaypointOverlap, getLaneCoordinates,\
+								getClosestLane, calculatePathMap
 
 	def __init__(self):
 		self.G = nx.Graph() # removed Di, TODO test
@@ -28,6 +29,7 @@ class Map:
 		self.agentNameCounter = 0
 		self.draw = Draw()
 		self.rel_residual = (0, 0)
+		self.pathMap = None
 		self.nodePath = []
 		self.waypointPath = []
 		self.target = 501
@@ -57,13 +59,31 @@ class Map:
 		self.AGENT1 = pyg.USEREVENT+1
 		self.AGENT2 = pyg.USEREVENT+2
 		self.AGENT3 = pyg.USEREVENT+3
-		# pyg.time.set_timer(self.AGENT1, 1000)
+		# pyg.time.set_timer(self.AGENT1, 5000)
 		# pyg.time.set_timer(self.AGENT2, 1200)
 		# pyg.time.set_timer(self.AGENT3, 4000)
 
-	def recalculateEdgeLengths(self):
+	def mapChanged(self):
+		self.recalculateEdgeParams()
+		self.calculatePathMap()
+
+	def recalculateEdgeParams(self):
 		for edge in self.G.edges:
 			self.G.edges[edge]['length'] = tupleDistance(self.G.nodes[edge[0]]['coordinates'], self.G.nodes[edge[1]]['coordinates'])
+			start = self.G.edges[edge]['start']
+			end = self.G.edges[edge]['end']
+
+			x1, y1 = self.G.nodes[start]['coordinates']
+			x2, y2 = self.G.nodes[end]['coordinates']
+			angleAcross = np.arctan2(x1-x2, y2-y1)
+			angleAlong = np.arctan2(y1-y2, x1-x2)
+
+			self.G.edges[start, end]['angleAcross'] = angleAcross
+			self.G.edges[start, end]['angleAlong'] = angleAlong
+			self.G.edges[start, end]['sinAcross'] = np.sin(angleAcross)
+			self.G.edges[start, end]['cosAcross'] = np.cos(angleAcross)
+			self.G.edges[start, end]['sinAlong'] = np.sin(angleAlong)
+			self.G.edges[start, end]['cosAlong'] = np.cos(angleAlong)
 
 	def add_node(self, name, x, y):
 		self.G.add_node(name)
@@ -76,15 +96,31 @@ class Map:
 		self.G.edges[start, end]['laneWidth'] = width
 		self.G.edges[start, end]['length'] = tupleDistance(self.G.nodes[start]['coordinates'], self.G.nodes[end]['coordinates'])
 
+		x1, y1 = self.G.nodes[start]['coordinates']
+		x2, y2 = self.G.nodes[end]['coordinates']
+		angleAcross = np.arctan2(x1-x2, y2-y1)
+		angleAlong = np.arctan2(y1-y2, x1-x2)
+
+		self.G.edges[start, end]['angleAcross'] = angleAcross
+		self.G.edges[start, end]['angleAlong'] = angleAlong
+		self.G.edges[start, end]['sinAcross'] = np.sin(angleAcross)
+		self.G.edges[start, end]['cosAcross'] = np.cos(angleAcross)
+		self.G.edges[start, end]['sinAlong'] = np.sin(angleAlong)
+		self.G.edges[start, end]['cosAlong'] = np.cos(angleAlong)
+
+		self.G.edges[start, end]['start'] = start
+		self.G.edges[start, end]['end'] = end
+
 	def add_room(self, number, start, end, distance):
 		# TODO check if edge exists
 		room = Room(start, end, distance)
 		self.rooms[number] = room
 
-	def run_agent(self, origin_node, end_node, lane, speed):
-		agent = Agent(origin_node, end_node, lane, speed)
+	def run_agent(self, origin_node=None, end_node=None, lane=None, speed=None):
+		agent = Agent(self, self.agentNameCounter, origin_node, end_node, lane, speed)
 		self.agents[self.agentNameCounter] = agent
 		self.agentNameCounter += 1
+		agent.setTargetLane(2)
 
 	def activeReset(self):
 		self.activeNode = False
@@ -139,10 +175,14 @@ class Map:
 		return edge_candidates
 
 	def main(self):
+		self.calculatePathMap()
 		while True:
 			self.clock.tick(self.fps)
 			
 			self.robot.move(self.controlAction)
+			for agentIndex in list(self.agents):
+				self.agents[agentIndex].move()
+
 			self.calculateNodePath()
 			self.calculateWaypointPath()
 			self.eventHandlerLoop()
@@ -155,7 +195,7 @@ class Map:
 			self.drawRooms()
 			self.drawAgents()
 			self.drawPath(self.waypointPath)
-			self.drawWaypoints()
+			# self.drawWaypoints()
 			self.drawRobot()
 
 
