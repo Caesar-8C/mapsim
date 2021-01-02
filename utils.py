@@ -20,6 +20,7 @@ def between(midNumber, boundary1, boundary2):
 	return False
 
 class Agent:
+
 	def __init__(self, map, mapIndex, current_node=None, goal_node=None, lane = None, speed=None):
 		self.NEARBY_LIMIT = 120
 		self.SAFETY_LIMIT = 10
@@ -27,6 +28,7 @@ class Agent:
 		self.RANDOM_NORMAL_CHANGE_LANE = 0.0005
 		self.RANDOM_NORMAL_STOP = 0.05
 		self.LANE_REACHED = 2
+		self.fastforward = 1
 
 		self.size = 0
 		self.path = []
@@ -188,8 +190,8 @@ class Agent:
 		coords[0] += cosAcross*self.map.G.edges[self.current_node, self.next_node]['width']/2
 		coords[1] += sinAcross*self.map.G.edges[self.current_node, self.next_node]['width']/2
 
-		distIncrementAlong = self.direction*self.forwardSpeed/self.map.fps
-		distIncrementAcross = self.sideSpeed/self.map.fps
+		distIncrementAlong = self.direction*self.forwardSpeed*self.fastforward/self.map.fps
+		distIncrementAcross = self.sideSpeed*self.fastforward/self.map.fps
 
 		self.distance += distIncrementAlong
 		self.distanceAcross += distIncrementAcross

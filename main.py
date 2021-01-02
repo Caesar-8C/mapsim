@@ -15,9 +15,10 @@ class Map:
 	from pathPlanning import 	computeNodePathDistance, calculateNodePath, calculateWaypointPath,\
 								addEdgeWaypoints, addTargetWaypoints, removeWaypointOverlap, getLaneCoordinates,\
 								getClosestLane, calculatePathMap
+	from futurePrediction import predictFuture, pickCorridors, removeAgents
 
 	def __init__(self):
-		self.G = nx.Graph() # removed Di, TODO test
+		self.G = nx.Graph()
 		self.bgcolour = 0x2F, 0x4F, 0x4F
 		self.size = self.width, self.height = 800, 600
 		pyg.init()
@@ -55,6 +56,7 @@ class Map:
 		self.PATH_COLOR = (128, 0, 128)
 		self.WAYPOINT_COLOR = (200, 100, 100)
 		self.WAYPOINT_DISTANCE = 10
+		self.FUTURE_PREDICTION_TIME = 3
 
 		self.AGENT1 = pyg.USEREVENT+1
 		self.AGENT2 = pyg.USEREVENT+2
@@ -174,16 +176,22 @@ class Map:
 
 		return edge_candidates
 
+
+	def moveAgents(self):
+		for agentIndex in list(self.agents):
+			self.agents[agentIndex].move()
+
 	def main(self):
 		self.calculatePathMap()
 		while True:
 			self.clock.tick(self.fps)
-			
+
 			self.robot.move(self.controlAction)
-			for agentIndex in list(self.agents):
-				self.agents[agentIndex].move()
+			self.moveAgents()
+
 
 			self.calculateNodePath()
+			self.predictFuture()
 			self.calculateWaypointPath()
 			self.eventHandlerLoop()
 			
