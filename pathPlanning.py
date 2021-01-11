@@ -17,8 +17,8 @@ def calculateNodePath(self):
 
 	if self.robot.node != None:
 		paths = []
-		paths.append(self.pathMap[self.robot.node][targetEdge[0]])
-		paths.append(self.pathMap[self.robot.node][targetEdge[1]])
+		paths.append(self.pathMap[self.robot.node][targetEdge[0]].copy())
+		paths.append(self.pathMap[self.robot.node][targetEdge[1]].copy())
 
 		dists = []
 		dists.append(int(self.computeNodePathDistance(paths[0])) + abs(self.rooms[self.target].distance))
@@ -42,10 +42,10 @@ def calculateNodePath(self):
 	elif self.robot.edge != None:
 		if self.robot.edge != targetEdge:
 			paths = []
-			paths.append(self.pathMap[self.robot.edge[0]][targetEdge[0]])
-			paths.append(self.pathMap[self.robot.edge[0]][targetEdge[1]])
-			paths.append(self.pathMap[self.robot.edge[1]][targetEdge[0]])
-			paths.append(self.pathMap[self.robot.edge[1]][targetEdge[1]])
+			paths.append(self.pathMap[self.robot.edge[0]][targetEdge[0]].copy())
+			paths.append(self.pathMap[self.robot.edge[0]][targetEdge[1]].copy())
+			paths.append(self.pathMap[self.robot.edge[1]][targetEdge[0]].copy())
+			paths.append(self.pathMap[self.robot.edge[1]][targetEdge[1]].copy())
 
 			dists = []
 			dists.append(int(self.computeNodePathDistance(paths[0]) + tupleDistance(self.G.nodes[self.robot.edge[0]]['coordinates'], (self.robot.x, self.robot.y))) + abs(self.rooms[self.target].distance))

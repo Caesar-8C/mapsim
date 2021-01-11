@@ -1,8 +1,12 @@
 import copy
 
 def pickCorridors(self):
-	node = self.nodePath[0]
 	corridors = []
+	if len(self.nodePath) == 0 and not self.robot.edge is None:
+		corridors.append(self.robot.edge)
+		return corridors
+
+	node = self.nodePath[0]
 	for edge in self.G.edges:
 		if node in edge:
 			corridors.append(edge)
@@ -19,7 +23,8 @@ def removeAgents(self, corridors):
 
 def predictFuture(self):
 	corridors = self.pickCorridors()
-	# agentsBackup = self.agents.copy()
+	if len(corridors) == 0:
+		return
 
 	for agent in self.agents:
 		self.agents[agent].map = None
@@ -35,7 +40,19 @@ def predictFuture(self):
 
 
 	self.removeAgents(corridors)
+	distance = self.robot.distance + self.robot.direction*self.WAYPOINT_DISTANCE
+	direction = self.robot.direction
+	edge = self.robot.edge
+	data = []
 	for i in range(self.fps*self.FUTURE_PREDICTION_TIME):
 		self.moveAgents()
-	# TODO gather the data, where agents end up
+		waypoint_data = []
+		distance += self.robot.direction*self.WAYPOINT_DISTANCE
+		for agent in self.agents:
+			if agent.current_node in edge and agent.next_node in edge and \
+				direction*agent.distance < direction*distance:
+				waypoint_data.append(agent.lane)
+		data.append(waypoint_data)
 	self.agents = agentsBackup
+
+	return data
