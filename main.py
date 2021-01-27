@@ -6,6 +6,7 @@ import networkx as nx
 import time
 
 from utils import *
+from rosBridge import *
 from draw import Draw
 
 class Map:
@@ -15,10 +16,12 @@ class Map:
 	from pathPlanning import 	computeNodePathDistance, calculateNodePath, calculateWaypointPath,\
 								addEdgeWaypoints, addTargetWaypoints, removeWaypointOverlap, getLaneCoordinates,\
 								getClosestLane, calculatePathMap
-	from futurePrediction import predictFuture, pickCorridors, removeAgents
+	from futurePrediction import predictFuture, pickCorridors, getActiveAgents, backupAgents, getPreviousDistance,\
+								getNextEdge, getCurrentEdge, getDirection
 
 	def __init__(self):
 		self.G = nx.Graph()
+		self.bridge = bridge(self)
 		self.bgcolour = 0x2F, 0x4F, 0x4F
 		self.size = self.width, self.height = 800, 600
 		pyg.init()
@@ -57,6 +60,8 @@ class Map:
 		self.WAYPOINT_COLOR = (200, 100, 100)
 		self.WAYPOINT_DISTANCE = 10
 		self.FUTURE_PREDICTION_TIME = 3
+		self.FAST_FORWARD = 30
+		self.PREDICTION_MARGIN = 30
 
 		self.AGENT1 = pyg.USEREVENT+1
 		self.AGENT2 = pyg.USEREVENT+2
@@ -87,6 +92,14 @@ class Map:
 			self.G.edges[start, end]['sinAlong'] = np.sin(angleAlong)
 			self.G.edges[start, end]['cosAlong'] = np.cos(angleAlong)
 
+			width = self.G.edges[start, end]['width']
+			lanes = int(width/self.LANE_PIXEL_WIDTH)
+			if lanes == 0:
+				lanes = 1
+			self.G.edges[start, end]['lanes'] = lanes
+			laneWidth = width/lanes
+			self.G.edges[start, end]['laneWidth'] = laneWidth
+
 	def add_node(self, name, x, y):
 		self.G.add_node(name)
 		self.G.nodes[name]['coordinates'] = (x, y)
@@ -94,9 +107,15 @@ class Map:
 	def add_edge(self, start, end, width):
 		self.G.add_edge(start, end)
 		self.G.edges[start, end]['width'] = width
-		self.G.edges[start, end]['lanes'] = 1
-		self.G.edges[start, end]['laneWidth'] = width
 		self.G.edges[start, end]['length'] = tupleDistance(self.G.nodes[start]['coordinates'], self.G.nodes[end]['coordinates'])
+
+		lanes = int(width/self.LANE_PIXEL_WIDTH)
+		if lanes == 0:
+			lanes = 1
+		self.G.edges[start, end]['lanes'] = lanes
+		laneWidth = width/lanes
+		self.G.edges[start, end]['laneWidth'] = laneWidth
+
 
 		x1, y1 = self.G.nodes[start]['coordinates']
 		x2, y2 = self.G.nodes[end]['coordinates']
@@ -156,16 +175,17 @@ class Map:
 			x1, y1 = self.G.nodes[edge[0]]['coordinates']
 			x2, y2 = self.G.nodes[edge[1]]['coordinates']
 			halfWidth = self.G.edges[edge[0], edge[1]]['width']/2
+			sinAcross = self.G.edges[edge]['sinAcross']
+			cosAcross = self.G.edges[edge]['cosAcross']
 
-			angle = np.arctan2(x1-x2, y2-y1)
-			x3 = x1 + np.cos(angle)*halfWidth
-			y3 = y1 + np.sin(angle)*halfWidth
+			x3 = x1 + cosAcross*halfWidth
+			y3 = y1 + sinAcross*halfWidth
 
-			x4 = x1 - np.cos(angle)*halfWidth
-			y4 = y1 - np.sin(angle)*halfWidth
+			x4 = x1 - cosAcross*halfWidth
+			y4 = y1 - sinAcross*halfWidth
 
-			x6 = x2 + np.cos(angle)*halfWidth
-			y6 = y2 + np.sin(angle)*halfWidth
+			x6 = x2 + cosAcross*halfWidth
+			y6 = y2 + sinAcross*halfWidth
 
 			AM = tupleSubtract(pos, (x3, y3))
 			AB = tupleSubtract((x4, y4), (x3, y3))
@@ -182,17 +202,17 @@ class Map:
 			self.agents[agentIndex].move()
 
 	def main(self):
-		self.calculatePathMap()
 		while True:
 			self.clock.tick(self.fps)
 
 			self.robot.move(self.controlAction)
-			self.moveAgents()
+			if not self.bridge.enabled:
+				self.moveAgents()
 
 
 			self.calculateNodePath()
-			self.predictFuture()
-			self.calculateWaypointPath()
+			predictedEmptyLanes = self.predictFuture()
+			self.calculateWaypointPath(predictedEmptyLanes)
 			self.eventHandlerLoop()
 			
 
@@ -203,7 +223,7 @@ class Map:
 			self.drawRooms()
 			self.drawAgents()
 			self.drawPath(self.waypointPath)
-			# self.drawWaypoints()
+			self.drawWaypoints()
 			self.drawRobot()
 
 
@@ -212,6 +232,7 @@ class Map:
 if __name__ == '__main__':
 	map = Map()
 
+	# map.bridge.enable()
 	map.loadGraph('data/graph2.txt')
 
 	map.main()

@@ -43,6 +43,7 @@ def eventHandlerLoop(self):
 				self.draw.scale *= 1.1
 				self.draw.shift = tupleSum(self.draw.shift, tupleSubtract(self.mouseDescale(event.pos), pos_1))
 			self.activeReset()
+			self.mapChanged()
 		if event.type == pyg.MOUSEBUTTONDOWN and event.button == 5:
 			self.activateElement(self.mouseDescale(event.pos))
 			if not self.activeEdge == False:
@@ -54,6 +55,7 @@ def eventHandlerLoop(self):
 				self.draw.scale /= 1.1
 				self.draw.shift = tupleSum(self.draw.shift, tupleSubtract(self.mouseDescale(event.pos), pos_1))
 			self.activeReset()
+			self.mapChanged()
 
 		if event.type == pyg.KEYDOWN:
 			if event.key == pyg.K_k:
@@ -64,6 +66,8 @@ def eventHandlerLoop(self):
 
 			if event.key == pyg.K_x:
 				self.run_agent()
+			if event.key == pyg.K_c:
+				self.run_agent(2, 1)
 
 		if event.type == self.AGENT1:
 			self.run_agent(origin_node=2, end_node=3, lane=1, speed=60)

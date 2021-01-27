@@ -26,6 +26,8 @@ def loadGraph(self, file):
 
 	f.close()
 
+	self.calculatePathMap()
+
 def saveGraph(self, file):
 	f = open(file, 'w')
 	if f.closed:

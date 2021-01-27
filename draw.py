@@ -60,13 +60,9 @@ def drawLanes(self, node, successor):
 	x1, y1 = self.G.nodes[node]['coordinates']
 	x2, y2 = self.G.nodes[successor]['coordinates']
 	width = self.G.edges[node, successor]['width']
-	
-	lanes = int(width/self.LANE_PIXEL_WIDTH)
-	if lanes == 0:
-		lanes = 1
-	self.G.edges[node, successor]['lanes'] = lanes
-	laneWidth = width/lanes
-	self.G.edges[node, successor]['laneWidth'] = laneWidth
+
+	lanes = self.G.edges[node, successor]['lanes']
+	laneWidth = self.G.edges[node, successor]['laneWidth']
 
 	if lanes > 1:
 		sinAcross = self.G.edges[node, successor]['sinAcross']

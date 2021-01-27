@@ -56,36 +56,44 @@ def calculateNodePath(self):
 			self.nodePath = paths[np.argmin(dists)]
 
 
-def calculateWaypointPath(self):
+def calculateWaypointPath(self, predictedBusyLanes):
 	self.waypointPath = []
 	targetEdge = (self.rooms[self.target].start, self.rooms[self.target].end)
 
 	if self.robot.edge == targetEdge:
-		self.addTargetWaypoints()
+		self.addTargetWaypoints(predictedBusyLanes)
 		return
 
 	if self.robot.edge != None:
-		self.addEdgeWaypoints(self.robot.edge, self.nodePath[0])
+		self.addEdgeWaypoints(predictedBusyLanes, self.robot.edge, self.nodePath[0])
 
 	for i in range(len(self.nodePath)-1):
 		for edge in self.G.edges:
 			if self.nodePath[i] in edge and self.nodePath[i+1] in edge:
 				index = len(self.waypointPath)-1
-				self.addEdgeWaypoints(edge, self.nodePath[i+1])
+				self.addEdgeWaypoints(predictedBusyLanes, edge, self.nodePath[i+1])
 				self.removeWaypointOverlap(index)
 				break
 	
 	if len(self.nodePath) != 0:
 		index = len(self.waypointPath)-1
-		self.addTargetWaypoints(self.nodePath[-1])
+		self.addTargetWaypoints(predictedBusyLanes, self.nodePath[-1])
 		self.removeWaypointOverlap(index)
 
 
-def addEdgeWaypoints(self, edge, node):
+def addEdgeWaypoints(self, predictedBusyLanes, edge, node):
 	if edge == self.robot.edge:
-		distance = self.robot.distance
 		direction = 1 if edge[1] == node else -1
-		lane = self.getClosestLane(edge, distance)
+		maxDist = self.G.edges[edge]['length']
+		distance =  0 if direction == 1 else maxDist
+
+		if self.robot.distance is None:
+			targetDist = 0 if direction == 1 else maxDist
+		else:
+			targetDist = self.robot.distance
+
+		while direction*distance < direction*(targetDist + direction*self.WAYPOINT_DISTANCE):
+			distance += direction*self.WAYPOINT_DISTANCE
 	else:
 		if edge[0] == node:
 			distance = self.G.edges[edge]['length']
@@ -93,18 +101,35 @@ def addEdgeWaypoints(self, edge, node):
 		else:
 			distance = 0
 			direction = 1
-		lane = 0 # fix (pick closest lane to a robot)
 
 
 	maxDist = self.G.edges[edge]['length']
+	lanes = list(range(self.G.edges[edge]['lanes']))
+
+	step = self.robot.maxVelocity[0]*self.FAST_FORWARD/self.WAYPOINT_DISTANCE
+	waypointCounter = 0
 
 	while 0 <= distance and distance <= maxDist:
-		# TODO make a function here to determine the best lane
+		if len(predictedBusyLanes) > 0:
+			emptyLanes = subtractLists(lanes, predictedBusyLanes[0])
+		else:
+			emptyLanes = lanes
+
+		waypointCounter += 1
+		if waypointCounter%step == 0 and len(predictedBusyLanes) > 0:
+			del predictedBusyLanes[0]
+
+		if len(emptyLanes) == 0:
+			lane = 0
+		elif direction == 1:
+			lane = np.max(emptyLanes)
+		else:
+			lane = np.min(emptyLanes)
 		self.waypointPath.append(self.getLaneCoordinates(edge, distance, lane))
 		distance += direction*self.WAYPOINT_DISTANCE
 
 
-def addTargetWaypoints(self, node = None):
+def addTargetWaypoints(self, predictedBusyLanes, node = None):
 	edge = (self.rooms[self.target].start, self.rooms[self.target].end)
 	targetDistance = abs(self.rooms[self.target].distance)
 	corridorSide = True if self.rooms[self.target].distance < 0 else False
@@ -129,7 +154,7 @@ def addTargetWaypoints(self, node = None):
 			break
 		self.waypointPath.append(self.getLaneCoordinates(edge, distance, targetLane))
 
-def removeWaypointOverlap(self, index):
+def removeWaypointOverlap(self, index): # TODO check validity after change in predicted Path
 	maxIndex = len(self.waypointPath)-1
 
 	index1 = index
@@ -199,7 +224,7 @@ def getLaneCoordinates(self, edge, distanceAlong=0, laneIndex=1):
 
 	distanceAcross = (laneIndex + 0.5) * self.G.edges[edge]['laneWidth'] - halfWidth
 
-	x3 = x1 + cosAcross*distanceAcross - cosAlong*distanceAlong
-	y3 = y1 + sinAcross*distanceAcross - sinAlong*distanceAlong
+	x3 = x1 - cosAcross*distanceAcross - cosAlong*distanceAlong
+	y3 = y1 - sinAcross*distanceAcross - sinAlong*distanceAlong
 
 	return (x3, y3)
