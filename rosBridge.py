@@ -2,7 +2,7 @@
 import numpy as np
 # from geometry_msgs.msg import PoseStamped
 
-class bridge:
+class Bridge:
 	def __init__(self, map):
 		self.map = map
 		self.enabled = False

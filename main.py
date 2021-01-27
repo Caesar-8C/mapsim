@@ -5,9 +5,11 @@ import pygame as pyg
 import networkx as nx
 import time
 
-from utils import *
-from rosBridge import *
+from agent import Agent
+from robot import Robot
+from rosBridge import Bridge
 from draw import Draw
+from utils import tupleSubtract, tupleDistance, Room
 
 class Map:
 	from eventHandlerLoop import eventHandlerLoop, mouseScale, mouseDescale
@@ -21,7 +23,7 @@ class Map:
 
 	def __init__(self):
 		self.G = nx.Graph()
-		self.bridge = bridge(self)
+		self.bridge = Bridge(self)
 		self.bgcolour = 0x2F, 0x4F, 0x4F
 		self.size = self.width, self.height = 800, 600
 		pyg.init()
