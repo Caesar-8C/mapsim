@@ -33,15 +33,6 @@ class Robot:
 				self.velocity[i] = self.changeVelocity(self.velocity[i], controlAction[i], self.maxVelocity[i])
 
 		self.mapLocate()
-		# UNCOMMENT FOR COLLISION CHECKING
-		# if not self.obstacleCollisionCheck():
-		# 	self.reset()
-		# for i in np.linspace(0, 2*np.pi, num=self.COLLISION_DISCRETIZATION):
-		# 	x = self.x + np.cos(i)*self.map.ROBOT_SIZE
-		# 	y = self.y + np.sin(i)*self.map.ROBOT_SIZE
-		# 	if not self.mapCollisionCheck((x, y)):
-		# 		self.reset()
-		# 		break
 
 
 	def automove(self, waypoint):
@@ -62,22 +53,6 @@ class Robot:
 		if abs(velocity) > maxVelocity:
 			return np.sign(velocity) * maxVelocity
 		return velocity
-
-	def obstacleCollisionCheck(self):
-		pos = (self.x, self.y)
-		for agent in self.map.agents:
-			agent_pos = (self.map.agents[agent].x, self.map.agents[agent].y)
-			dist = tupleDistance(agent_pos, pos)
-			if dist < self.map.agents[agent].size + self.map.ROBOT_SIZE:
-				return False
-		return True
-
-	def mapCollisionCheck(self, pos):
-		if self.map.insideNodeCheck(pos, self.map.NODE_SIZE) != None:
-			return True
-		if len(self.map.insideEdgeCheck(pos)) > 0:
-			return True
-		return False
 
 
 	def mapLocate(self):
