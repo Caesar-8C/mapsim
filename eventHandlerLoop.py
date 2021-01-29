@@ -89,9 +89,9 @@ def eventHandlerLoop(self):
 			if event.key == pyg.K_q:
 				self.controlAction[1] = -1.2
 			if event.key == pyg.K_d:
-				self.controlAction[2] = 1.2
+				self.controlAction[2] = 0.02
 			if event.key == pyg.K_a:
-				self.controlAction[2] = -1.2
+				self.controlAction[2] = -0.02
 
 		if event.type == pyg.KEYUP:
 			if event.key == pyg.K_w or event.key == pyg.K_s:

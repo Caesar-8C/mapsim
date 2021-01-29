@@ -22,6 +22,27 @@ class Map:
 								getNextEdge, getCurrentEdge, getDirection
 
 	def __init__(self):
+		self.NODE_SIZE = 30
+		self.NODE_CORE_SIZE = 10
+		self.MIN_CLICKABLE_CORRIDOR_WIDTH = 5
+		self.LANE_PIXEL_WIDTH = 20
+		self.ROBOT_SIZE = 10
+		self.ROBOT_COLOR = (255, 0, 0)
+		self.NODE_COLOR = (0, 128, 0)
+		self.CORRIDOR_COLOR = (255, 255, 255)
+		self.LANE_COLOR = (0, 100, 0)
+		self.AGENT_COLOR = (0, 0, 100)
+		self.ROOM_COLOR = (255, 0, 0)
+		self.PATH_COLOR = (128, 0, 128)
+		self.WAYPOINT_COLOR = (200, 100, 100)
+		self.WAYPOINT_DISTANCE = 10
+		self.FUTURE_PREDICTION_TIME = 3
+		self.FAST_FORWARD = 30
+		self.PREDICTION_MARGIN = 30
+		self.ROBOT_INIT_POSE = (200, 300, 0)
+
+
+
 		self.G = nx.Graph()
 		self.bridge = Bridge(self)
 		self.bgcolour = 0x2F, 0x4F, 0x4F
@@ -40,30 +61,12 @@ class Map:
 		self.waypointPath = []
 		self.target = 501
 
-		self.robot = Robot(200, 300, self)
+		self.robot = Robot(*self.ROBOT_INIT_POSE, self)
 		self.controlAction = [0, 0, 0]
 
 		self.activeNode = False
 		self.activeEdge = False
 		self.activeBackground = False
-
-		self.NODE_SIZE = 30
-		self.NODE_CORE_SIZE = 10
-		self.MIN_CLICKABLE_CORRIDOR_WIDTH = 5
-		self.LANE_PIXEL_WIDTH = 20
-		self.ROBOT_SIZE = 10
-		self.ROBOT_COLOR = (255, 0, 0)
-		self.NODE_COLOR = (0, 128, 0)
-		self.CORRIDOR_COLOR = (255, 255, 255)
-		self.LANE_COLOR = (0, 100, 0)
-		self.AGENT_COLOR = (0, 0, 100)
-		self.ROOM_COLOR = (255, 0, 0)
-		self.PATH_COLOR = (128, 0, 128)
-		self.WAYPOINT_COLOR = (200, 100, 100)
-		self.WAYPOINT_DISTANCE = 10
-		self.FUTURE_PREDICTION_TIME = 3
-		self.FAST_FORWARD = 30
-		self.PREDICTION_MARGIN = 30
 
 		self.AGENT1 = pyg.USEREVENT+1
 		self.AGENT2 = pyg.USEREVENT+2
@@ -216,7 +219,7 @@ class Map:
 			predictedEmptyLanes = self.predictFuture()
 			self.calculateWaypointPath(predictedEmptyLanes)
 
-			if self.robot.automoveEnabled and len(self.waypointPath) > 0:
+			if not self.bridge.enabled and self.robot.automoveEnabled and len(self.waypointPath) > 0:
 				self.robot.automove(self.waypointPath[0])
 
 			self.eventHandlerLoop()

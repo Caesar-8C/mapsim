@@ -1,12 +1,12 @@
 import numpy as np
-from utils import tupleDistance, tupleSubtract
+from utils import tupleDistance, tupleSubtract, normalizeAngle
 
 class Robot:
-	def __init__(self, x, y, map):
+	def __init__(self, x, y, theta, map):
 		self.resetCoordinates = (x, y)
 		self.x = x
 		self.y = y
-		self.theta = 0
+		self.theta = theta
 		self.distance = None
 		self.lane = None
 
@@ -16,7 +16,7 @@ class Robot:
 
 		self.map = map
 		self.velocity = [0, 0, 0]
-		self.maxVelocity = [100./self.map.fps, 100./self.map.fps, 150./self.map.fps] # pixels per second
+		self.maxVelocity = [100./self.map.fps, 100./self.map.fps, np.pi/self.map.fps] # pixels per second
 
 		self.automoveEnabled = False
 
@@ -24,14 +24,15 @@ class Robot:
 
 
 	def move(self, controlAction):
-		if not self.map.bridge.enabled:
+		if not self.map.bridge.enabled or not self.automoveEnabled:
 			self.x += self.velocity[0]*np.cos(self.theta) - self.velocity[1]*np.sin(self.theta)
 			self.y += self.velocity[0]*np.sin(self.theta) + self.velocity[1]*np.cos(self.theta)
-			self.theta += self.velocity[2]*np.pi/180.
+			self.theta += self.velocity[2]
 
 			for i in range(3):
 				self.velocity[i] = self.changeVelocity(self.velocity[i], controlAction[i], self.maxVelocity[i])
 
+		self.mapLocate()
 		# UNCOMMENT FOR COLLISION CHECKING
 		# if not self.obstacleCollisionCheck():
 		# 	self.reset()
@@ -42,12 +43,16 @@ class Robot:
 		# 		self.reset()
 		# 		break
 
-		self.mapLocate()
 
 	def automove(self, waypoint):
-		angle = np.arctan2(self.y-waypoint[1], self.x-waypoint[0])
-		self.x -= self.maxVelocity[0]*np.cos(angle) + self.maxVelocity[1]*np.sin(angle)
-		self.y -= self.maxVelocity[0]*np.sin(angle) - self.maxVelocity[1]*np.cos(angle)
+
+		angle = np.arctan2(self.y-waypoint[1], self.x-waypoint[0])+np.pi
+		self.x += self.maxVelocity[0]*np.cos(angle)
+		self.y += self.maxVelocity[0]*np.sin(angle)
+		angle = normalizeAngle(angle)
+		robotAngle = normalizeAngle(self.theta)
+		self.theta += self.maxVelocity[2]*np.sign(angle-robotAngle)
+		self.mapLocate()
 
 
 	def changeVelocity(self, velocity, controlAction, maxVelocity):

@@ -18,6 +18,13 @@ def between(midNumber, boundary1, boundary2):
 			return True
 	return False
 
+def normalizeAngle(angle):
+	while angle > np.pi:
+		angle = angle - 2.*np.pi
+	while angle < -np.pi:
+		angle = angle + 2.*np.pi
+	return angle
+
 def subtractLists(a, b):
 	res = []
 	for i in a:
