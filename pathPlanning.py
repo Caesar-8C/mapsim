@@ -83,7 +83,7 @@ def calculateWaypointPath(self, predictedBusyLanes):
 
 def addEdgeWaypoints(self, predictedBusyLanes, edge, node):
 	if edge == self.robot.edge:
-		direction = 1 if edge[1] == node else -1
+		direction = 1 if self.G.edges[edge]['end'] == node else -1
 		maxDist = self.G.edges[edge]['length']
 		distance =  0 if direction == 1 else maxDist
 
@@ -114,6 +114,10 @@ def addEdgeWaypoints(self, predictedBusyLanes, edge, node):
 			emptyLanes = subtractLists(lanes, predictedBusyLanes[0])
 		else:
 			emptyLanes = lanes
+
+		# TODO
+		#  if len(emptyLanes) == 0:
+		# 	stop
 
 		waypointCounter += 1
 		if waypointCounter%step == 0 and len(predictedBusyLanes) > 0:
@@ -213,14 +217,16 @@ def getLaneCoordinates(self, edge, distanceAlong=0, laneIndex=1):
 	if laneIndex < 0:
 		pass
 
-	x1, y1 = self.G.nodes[edge[0]]['coordinates']
-	x2, y2 = self.G.nodes[edge[1]]['coordinates']
-	halfWidth = self.G.edges[edge[0], edge[1]]['width']/2
+	start = self.G.edges[edge]['start']
+	end = self.G.edges[edge]['end']
+	x1, y1 = self.G.nodes[start]['coordinates']
+	x2, y2 = self.G.nodes[end]['coordinates']
+	halfWidth = self.G.edges[edge]['width']/2
 
-	sinAcross = self.G.edges[edge[0], edge[1]]['sinAcross']
-	cosAcross = self.G.edges[edge[0], edge[1]]['cosAcross']
-	sinAlong = self.G.edges[edge[0], edge[1]]['sinAlong']
-	cosAlong = self.G.edges[edge[0], edge[1]]['cosAlong']
+	sinAcross = self.G.edges[edge]['sinAcross']
+	cosAcross = self.G.edges[edge]['cosAcross']
+	sinAlong = self.G.edges[edge]['sinAlong']
+	cosAlong = self.G.edges[edge]['cosAlong']
 
 	distanceAcross = (laneIndex + 0.5) * self.G.edges[edge]['laneWidth'] - halfWidth
 

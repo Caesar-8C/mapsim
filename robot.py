@@ -18,6 +18,8 @@ class Robot:
 		self.velocity = [0, 0, 0]
 		self.maxVelocity = [100./self.map.fps, 100./self.map.fps, 150./self.map.fps] # pixels per second
 
+		self.automoveEnabled = False
+
 		self.COLLISION_DISCRETIZATION = 13
 
 
@@ -41,6 +43,11 @@ class Robot:
 		# 		break
 
 		self.mapLocate()
+
+	def automove(self, waypoint):
+		angle = np.arctan2(self.y-waypoint[1], self.x-waypoint[0])
+		self.x -= self.maxVelocity[0]*np.cos(angle) + self.maxVelocity[1]*np.sin(angle)
+		self.y -= self.maxVelocity[0]*np.sin(angle) - self.maxVelocity[1]*np.cos(angle)
 
 
 	def changeVelocity(self, velocity, controlAction, maxVelocity):
@@ -98,17 +105,38 @@ class Robot:
 
 
 	def computeCorridorDistance(self):
-		R = (self.x, self.y)
-		A = self.map.G.nodes[self.edge[0]]['coordinates']
-		B = self.map.G.nodes[self.edge[1]]['coordinates']
-		dist = self.map.G.edges[self.edge]['length']
+		# R = (self.x, self.y)
+		# A = self.map.G.nodes[self.edge[0]]['coordinates']
+		# B = self.map.G.nodes[self.edge[1]]['coordinates']
+		# dist = self.map.G.edges[self.edge]['length']
+		#
+		# AR = tupleSubtract(R, A)
+		# AB = tupleSubtract(B, A)
+		# return int(np.dot(AR, AB)/dist)
 
-		AR = tupleSubtract(R, A)
-		AB = tupleSubtract(B, A)
-		return int(np.dot(AR, AB)/dist)
+		start_node = self.map.G.edges[self.edge]['start']
+		coordinates = [self.x, self.y]
+		origin = np.array(self.map.G.nodes[start_node]['coordinates'])
+		sinAcross = self.map.G.edges[self.edge]['sinAcross']
+		cosAcross = self.map.G.edges[self.edge]['cosAcross']
+		width = self.map.G.edges[self.edge]['width']
+		origin[0] += cosAcross*width/2
+		origin[1] += sinAcross*width/2
+		coordinates -= origin
+
+		rotAngle = -np.pi - self.map.G.edges[self.edge]['angleAlong']
+
+		distance = coordinates[0]*np.cos(rotAngle) - coordinates[1]*np.sin(rotAngle)
+		return distance
 
 
 	def reset(self):
 		self.x, self.y = self.resetCoordinates
 		self.theta = 0
 		self.velocity = [0, 0, 0]
+
+	def enableAutomove(self):
+		self.automoveEnabled = True
+
+	def disableAutomove(self):
+		self.automoveEnabled = False

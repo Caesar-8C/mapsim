@@ -215,6 +215,10 @@ class Map:
 			self.calculateNodePath()
 			predictedEmptyLanes = self.predictFuture()
 			self.calculateWaypointPath(predictedEmptyLanes)
+
+			if self.robot.automoveEnabled and len(self.waypointPath) > 0:
+				self.robot.automove(self.waypointPath[0])
+
 			self.eventHandlerLoop()
 			
 
@@ -235,6 +239,7 @@ if __name__ == '__main__':
 	map = Map()
 
 	# map.bridge.enable()
+	map.robot.enableAutomove()
 	map.loadGraph('data/graph2.txt')
 
 	map.main()
