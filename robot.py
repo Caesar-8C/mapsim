@@ -19,6 +19,7 @@ class Robot:
 		self.maxVelocity = [100./self.map.fps, 100./self.map.fps, np.pi/self.map.fps] # pixels per second
 
 		self.automoveEnabled = False
+		self.stopAutoMove = False
 
 		self.COLLISION_DISCRETIZATION = 13
 
@@ -36,13 +37,13 @@ class Robot:
 
 
 	def automove(self, waypoint):
-
-		angle = np.arctan2(self.y-waypoint[1], self.x-waypoint[0])+np.pi
-		self.x += self.maxVelocity[0]*np.cos(angle)
-		self.y += self.maxVelocity[0]*np.sin(angle)
-		angle = normalizeAngle(angle)
-		robotAngle = normalizeAngle(self.theta)
-		self.theta += self.maxVelocity[2]*np.sign(angle-robotAngle)
+		if not self.stopAutoMove:
+			angle = np.arctan2(self.y-waypoint[1], self.x-waypoint[0])+np.pi
+			self.x += self.maxVelocity[0]*np.cos(angle)
+			self.y += self.maxVelocity[0]*np.sin(angle)
+			angle = normalizeAngle(angle)
+			robotAngle = normalizeAngle(self.theta)
+			self.theta += self.maxVelocity[2]*np.sign(angle-robotAngle)
 		self.mapLocate()
 
 
