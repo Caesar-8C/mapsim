@@ -221,6 +221,17 @@ class Map:
 
 			if not self.bridge.enabled and self.robot.automoveEnabled and len(self.waypointPath) > 0:
 				self.robot.automove(self.waypointPath[0])
+			if self.bridge.enabled and not self.robot.automoveEnabled and len(self.waypointPath) > 0:
+				try:
+					# TODO calculate angle properly
+					angle = self.robot.direction*self.G.edges[self.robot.edge]['angleAlong']
+				except:
+					angle = 0
+				# print('angle ', angle)
+				if self.robot.stopMoving:
+					self.bridge.publish((self.robot.x, self.robot.y), angle)
+				else:
+					self.bridge.publish(self.waypointPath[0], angle)
 
 			self.eventHandlerLoop()
 			

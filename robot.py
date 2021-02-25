@@ -19,13 +19,13 @@ class Robot:
 		self.maxVelocity = [100./self.map.fps, 100./self.map.fps, np.pi/self.map.fps] # pixels per second
 
 		self.automoveEnabled = False
-		self.stopAutoMove = False
+		self.stopMoving = False
 
 		self.COLLISION_DISCRETIZATION = 13
 
 
 	def move(self, controlAction):
-		if not self.map.bridge.enabled or not self.automoveEnabled:
+		if not self.map.bridge.enabled and not self.automoveEnabled:
 			self.x += self.velocity[0]*np.cos(self.theta) - self.velocity[1]*np.sin(self.theta)
 			self.y += self.velocity[0]*np.sin(self.theta) + self.velocity[1]*np.cos(self.theta)
 			self.theta += self.velocity[2]
@@ -37,7 +37,7 @@ class Robot:
 
 
 	def automove(self, waypoint):
-		if not self.stopAutoMove:
+		if not self.stopMoving:
 			angle = np.arctan2(self.y-waypoint[1], self.x-waypoint[0])+np.pi
 			self.x += self.maxVelocity[0]*np.cos(angle)
 			self.y += self.maxVelocity[0]*np.sin(angle)

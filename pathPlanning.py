@@ -115,7 +115,7 @@ def addEdgeWaypoints(self, predictedBusyLanes, edge, node):
 		else:
 			emptyLanes = lanes
 
-		self.robot.stopAutoMove = True if len(emptyLanes) == 0 else False
+		self.robot.stopMoving = True if len(emptyLanes) == 0 else False
 
 		waypointCounter += 1
 		if waypointCounter%step == 0 and len(predictedBusyLanes) > 0:

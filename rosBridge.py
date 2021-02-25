@@ -16,13 +16,13 @@ class Bridge:
 	def disable(self):
 		self.enabled = False
 
-	def publish(self, waypoint):
+	def publish(self, waypoint, angle):
 		# msg = PoseStamped()
 		# msg.header.frame_id = 'map'
 		# msg.pose.position.x = waypoint[0]
 		# msg.pose.position.y = waypoint[1]
-		# msg.pose.orientation.z = np.sin(waypoint[2]/2.)
-		# msg.pose.orientation.w = np.cos(waypoint[2]/2.)
+		# msg.pose.orientation.z = np.sin(angle/2.)
+		# msg.pose.orientation.w = np.cos(angle/2.)
 		# self.publisher.publish(msg)
 		pass
 
