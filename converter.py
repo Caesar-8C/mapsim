@@ -9,11 +9,12 @@ class dimensionConverter:
 	def __init__(self):
 		rospy.init_node('listener', anonymous=True)
 		self.publisher = rospy.Publisher('/DCtransform', PoseStamped, queue_size=1)
-		self.robotListener = rospy.Subscriber('/robotTracker/pose', PoseStamped, self.trackerCallback, queue_size=1)
+		self.robotListener = rospy.Subscriber('/tracker/pose', PoseStamped, self.trackerCallback, queue_size=1)
 		self.agentListener = rospy.Subscriber('/DCcontrol', String, self.DCcontrolCallback, queue_size=1)
 
 		self.point = None
 		self.origin = None
+		self.quaternionOrigin = None
 		self.vector = None
 		self.points = []
 		self.vectorBasis = None
@@ -22,18 +23,30 @@ class dimensionConverter:
 			pass
 
 	def trackerCallback(self, data):
-		self.point = [data.pose.position.x, data.pose.position.y, data.pose.position.z]
+		if np.abs(data.pose.position.x) + np.abs(data.pose.position.y) + np.abs(data.pose.position.z) < 0.01:
+			self.point = None
+		else:
+			self.point = [data.pose.position.x, data.pose.position.y, data.pose.position.z]
+			self.orientation = [data.pose.orientation.x, data.pose.orientation.y, data.pose.orientation.z, data.pose.orientation.w]
 
 	def DCcontrolCallback(self, data):
-		if data == 'point': # data.data?
+		if self.point is None:
+			print('self.point is None')
+			return
+		if data.data == 'point':
 			self.points.append(self.point.copy())
-		elif data == 'origin':
+			print('added point ', self.point)
+		elif data.data == 'origin':
 			self.points.append(self.point.copy())
 			self.origin = np.array(self.point)
-		elif data == 'vector':
+			self.quaternionOrigin = np.array(self.orientation)
+			print('set origin ', self.point)
+		elif data.data == 'vector':
 			self.points.append(self.point.copy())
 			self.vector = np.array(self.point)
-		elif data == 'compute':
+			print('set xAxis ', self.point)
+		elif data.data == 'compute':
+			print('computing')
 			self.compute()
 			self.publish()
 
@@ -43,35 +56,38 @@ class dimensionConverter:
 
 		points = Points(self.points)
 		self.plane = Plane.best_fit(points)
-		self.vector = np.array(plane.project_point(self.vector))
-		self.origin = np.array(plane.project_point(self.origin))
+		self.vector = np.array(self.plane.project_point(self.vector))
+		self.origin = np.array(self.plane.project_point(self.origin))
 		self.xAxis = self.normalizeVector(self.vector - self.origin)
-		self.zAxis = self.normalizeVector(np.array(plane.normal))
-		self.yAxis = -np.cross(xAxis, zAxis)
-		self.vectorBasis = [xAxis, yAxis, zAxis]
+		self.normal = np.array(self.plane.normal)
+		a = np.argmax(np.abs(self.normal))
+		if self.normal[a] < 0: self.normal *= -1
+		self.zAxis = self.normalizeVector(self.normal)
+		self.yAxis = -np.cross(self.xAxis, self.zAxis)
+		self.vectorBasis = [self.xAxis, self.yAxis, self.zAxis]
 		self.quaternion = self.get_quaternion([[1, 0, 0], [0, 1, 0], [0, 0, 1]], self.vectorBasis)
 
-	def publish(self)
+	def publish(self):
 		msg = PoseStamped()
 		msg.header.frame_id = 'mapsim'
 		msg.pose.position.x = self.origin[0]
 		msg.pose.position.y = self.origin[1]
 		msg.pose.position.z = self.origin[2]
-		msg.pose.orientation.w = self.quaternion[0]
 		msg.pose.orientation.x = self.quaternion[1]
 		msg.pose.orientation.y = self.quaternion[2]
 		msg.pose.orientation.z = self.quaternion[3]
+		msg.pose.orientation.w = self.quaternion[0]
 		self.publisher.publish(msg)
 
 	def normalizeVector(self, vector):
-		norm = numpy.linalg.norm(vector)
+		norm = np.linalg.norm(vector)
 		vector /= norm
 		return vector
 
 	def get_quaternion(self, lst1, lst2, matchlist=None):
 		if not matchlist:
-			matchlist=range(len(lst1))
-		M=np.matrix([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
+			matchlist = range(len(lst1))
+		M = np.matrix([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
 
 		for i,coord1 in enumerate(lst1):
 			x = np.matrix(np.outer(coord1, lst2[matchlist[i]]))
