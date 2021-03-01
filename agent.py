@@ -10,6 +10,7 @@ class Agent:
 		self.RANDOM_NORMAL_CHANGE_LANE = 0.0005
 		self.RANDOM_NORMAL_STOP = 0.05
 		self.LANE_REACHED = 2
+		self.BRIDGE_RUNNING_MEAN_SIZE = 5
 		self.fastforward = 1
 
 		self.size = 0
@@ -18,6 +19,7 @@ class Agent:
 		self.stop = False
 		self.map = map
 		self.mapIndex = mapIndex
+		self.bridgeRunningVelocity = []
 
 		self.stopTime = None
 		self.waitTime = None
@@ -175,7 +177,8 @@ class Agent:
 		coords[0] += cosAcross*self.map.G.edges[self.current_node, self.next_node]['width']/2
 		coords[1] += sinAcross*self.map.G.edges[self.current_node, self.next_node]['width']/2
 
-		distIncrementAlong = self.direction*self.forwardSpeed*self.fastforward/self.map.fps
+		forwardSpeed = np.mean(self.bridgeRunningVelocity) if self.map.bridge.enabled else self.forwardSpeed
+		distIncrementAlong = self.direction*forwardSpeed*self.fastforward/self.map.fps
 		distIncrementAcross = self.sideSpeed*self.fastforward/self.map.fps
 
 		self.distance += distIncrementAlong
@@ -261,3 +264,8 @@ class Agent:
 
 	def goalReached(self):
 		del self.map.agents[self.mapIndex]
+
+	def addToBridgeRunningVelocity(self, vel):
+		if len(self.bridgeRunningVelocity) >= self.BRIDGE_RUNNING_MEAN_SIZE:
+			del self.bridgeRunningVelocity[0]
+		self.bridgeRunningVelocity.append(vel)

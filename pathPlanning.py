@@ -92,14 +92,14 @@ def addEdgeWaypoints(self, predictedBusyLanes, edge, node):
 		else:
 			targetDist = self.robot.distance
 
-		while direction*distance < direction*(targetDist + direction*self.WAYPOINT_DISTANCE):
+		while direction*distance < direction*(targetDist + direction*self.WAYPOINT_MARGIN*self.WAYPOINT_DISTANCE):
 			distance += direction*self.WAYPOINT_DISTANCE
 	else:
 		if edge[0] == node:
-			distance = self.G.edges[edge]['length']
+			distance = self.G.edges[edge]['length'] - self.WAYPOINT_DISTANCE
 			direction = -1
 		else:
-			distance = 0
+			distance = self.WAYPOINT_DISTANCE
 			direction = 1
 
 

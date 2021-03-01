@@ -15,6 +15,7 @@ class Robot:
 		self.edge_candidates = None
 
 		self.map = map
+		self.bridgeRunningVelocity = []
 		self.velocity = [0, 0, 0]
 		self.maxVelocity = [100./self.map.fps, 100./self.map.fps, np.pi/self.map.fps] # pixels per second
 
@@ -22,6 +23,7 @@ class Robot:
 		self.stopMoving = False
 
 		self.COLLISION_DISCRETIZATION = 13
+		self.BRIDGE_RUNNING_MEAN_SIZE = 5
 
 
 	def move(self, controlAction):
@@ -121,3 +123,8 @@ class Robot:
 
 	def disableAutomove(self):
 		self.automoveEnabled = False
+
+	def addToBridgeRunningVelocity(self, vel):
+		if len(self.bridgeRunningVelocity) >= self.BRIDGE_RUNNING_MEAN_SIZE:
+			del self.bridgeRunningVelocity[0]
+		self.bridgeRunningVelocity.append(vel)

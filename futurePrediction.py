@@ -1,4 +1,5 @@
 import copy
+import numpy as np
 
 def pickCorridors(self):
 	corridors = []
@@ -103,8 +104,8 @@ def predictFuture(self):
 	nodePathCounter = 0
 	direction = self.getDirection(edge, targetEdge, nodePathCounter)
 
-
-	stepDist = self.robot.maxVelocity[0]*self.FAST_FORWARD
+	velocity = np.mean(self.robot.bridgeRunningVelocity) if self.bridge.enabled else self.robot.maxVelocity[0]
+	stepDist = velocity*self.FAST_FORWARD
 	previousDistance = self.getPreviousDistance(edge, direction, stepDist)
 	distance = previousDistance + direction*(stepDist + self.PREDICTION_MARGIN)
 

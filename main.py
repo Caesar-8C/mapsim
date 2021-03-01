@@ -36,6 +36,7 @@ class Map:
 		self.PATH_COLOR = (128, 0, 128)
 		self.WAYPOINT_COLOR = (200, 100, 100)
 		self.WAYPOINT_DISTANCE = 10
+		self.WAYPOINT_MARGIN = 3
 		self.FUTURE_PREDICTION_TIME = 3
 		self.FAST_FORWARD = 30
 		self.PREDICTION_MARGIN = 30*3
@@ -45,7 +46,6 @@ class Map:
 
 
 		self.G = nx.Graph()
-		self.bridge = Bridge(self)
 		self.bgcolour = 0x2F, 0x4F, 0x4F
 		self.size = self.width, self.height = 800, 600
 		pyg.init()
@@ -63,6 +63,7 @@ class Map:
 		self.target = 501
 
 		self.robot = Robot(*self.ROBOT_INIT_POSE, self)
+		self.bridge = Bridge(self)
 		self.controlAction = [0, 0, 0]
 
 		self.activeNode = False
@@ -232,6 +233,7 @@ class Map:
 				if self.robot.stopMoving:
 					self.bridge.publish((self.robot.x, self.robot.y), angle)
 				else:
+					print(self.waypointPath[0])
 					self.bridge.publish(self.waypointPath[0], angle)
 
 			self.eventHandlerLoop()
@@ -253,8 +255,8 @@ class Map:
 if __name__ == '__main__':
 	map = Map()
 
-	# map.bridge.enable()
-	map.robot.enableAutomove()
+	map.bridge.enable()
+	# map.robot.enableAutomove()
 	# map.loadGraph('data/graph2.txt')
 	map.loadGraph('data/graph_test.txt')
 
