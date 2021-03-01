@@ -39,7 +39,8 @@ class Map:
 		self.FUTURE_PREDICTION_TIME = 3
 		self.FAST_FORWARD = 30
 		self.PREDICTION_MARGIN = 30*3
-		self.ROBOT_INIT_POSE = (200, 300, 0)
+		# self.ROBOT_INIT_POSE = (200, 300, 0)
+		self.ROBOT_INIT_POSE = (10, 0, 0)
 
 
 
@@ -254,6 +255,7 @@ if __name__ == '__main__':
 
 	# map.bridge.enable()
 	map.robot.enableAutomove()
-	map.loadGraph('data/graph2.txt')
+	# map.loadGraph('data/graph2.txt')
+	map.loadGraph('data/graph_test.txt')
 
 	map.main()

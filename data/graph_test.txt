@@ -1,0 +1,11 @@
+scale 0.8467108950806657
+shift 66 321
+
+node 1 0 0
+node 2 800 0
+node 3 800 100
+
+edge 1 2 60
+edge 2 3 60
+
+room 501 2 3 -60
