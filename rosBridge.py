@@ -8,8 +8,8 @@ class Bridge:
 		self.enabled = False
 		rospy.init_node('listener', anonymous=True)
 		self.publisher = rospy.Publisher('/move_base_simple/goal', PoseStamped, queue_size=1)
-		self.robotListener = rospy.Subscriber('/tracker/world_odometry', Odometry, self.robotCallback, queue_size=1)
-		# self.agentListener = rospy.Subscriber('/tracker/world_odometry', Odometry, self.agentCallback, queue_size=1)
+		self.robotListener = rospy.Subscriber('/tracker/world_odometry1', Odometry, self.robotCallback, queue_size=1)
+		self.agentListener = rospy.Subscriber('/tracker/world_odometry2', Odometry, self.agentCallback, queue_size=1)
 		self.scale = 40
 
 	def enable(self):

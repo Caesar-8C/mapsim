@@ -8,8 +8,10 @@ import tf
 class tf_ls:
 	def __init__(self):
 		rospy.init_node('listener', anonymous=True)
-		self.publisher = rospy.Publisher('/tracker/world_odometry', Odometry, queue_size=1)
-		listener =  rospy.Subscriber('/tracker/odometry', Odometry, self.robotCallback, queue_size=1)
+		self.robotPublisher = rospy.Publisher('/tracker/world_odometry1', Odometry, queue_size=1)
+		self.agentPublisher = rospy.Publisher('/tracker/world_odometry2', Odometry, queue_size=1)
+		listener =  rospy.Subscriber('/tracker/odometry1', Odometry, self.robotCallback, queue_size=1)
+		listener =  rospy.Subscriber('/tracker/odometry2', Odometry, self.agentCallback, queue_size=1)
 		self.tl = tf.TransformListener()
 		while not rospy.is_shutdown():
 			pass
@@ -40,9 +42,14 @@ class tf_ls:
 
 		return msg
 
+
 	def robotCallback(self, data):
 		msg = self.transform(data)
-		self.publisher.publish(msg)
+		self.robotPublisher.publish(msg)
+
+	def agentCallback(self, data):
+		msg = self.transform(data)
+		self.agentPublisher.publish(msg)
 
 
 if __name__ == '__main__':
