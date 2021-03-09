@@ -51,6 +51,9 @@ class Agent:
 		self.distance = 0 if self.direction == 1 else self.maxdist
 		self.distanceAcross = self.map.G.edges[self.current_node, self.next_node]['width']/2
 
+		self.distance = self.maxdist/2
+		self.distanceAcross = self.map.G.edges[self.current_node, self.next_node]['laneWidth']*2.5
+
 		self.changeLane()
 		self.setTargetLane(1)
 
@@ -125,7 +128,7 @@ class Agent:
 		self.path = self.map.pathMap[self.current_node][self.goal_node].copy()
 
 	def chooseSpeed(self):
-		self.forwardSpeed = np.random.random()*20+40
+		self.forwardSpeed = 0 #np.random.random()*20+40
 
 	def moveNormal(self):
 		r = np.random.random()
@@ -263,6 +266,7 @@ class Agent:
 		return np.argmin(norms)
 
 	def goalReached(self):
+		return
 		del self.map.agents[self.mapIndex]
 
 	def addToBridgeRunningVelocity(self, vel):

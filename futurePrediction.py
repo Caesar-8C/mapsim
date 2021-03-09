@@ -105,6 +105,7 @@ def predictFuture(self):
 	direction = self.getDirection(edge, targetEdge, nodePathCounter)
 
 	velocity = np.mean(self.robot.bridgeRunningVelocity) if self.bridge.enabled else self.robot.maxVelocity[0]
+	if velocity < self.RUNNING_VELOCITY_THRESHOLD: velocity = self.robot.maxVelocity[0]
 	stepDist = velocity*self.FAST_FORWARD
 	previousDistance = self.getPreviousDistance(edge, direction, stepDist)
 	distance = previousDistance + direction*(stepDist + self.PREDICTION_MARGIN)
@@ -136,4 +137,5 @@ def predictFuture(self):
 		distance += direction*stepDist
 
 	self.agents = agentsBackup
+	# print('\n\ndata:\n', data)
 	return data

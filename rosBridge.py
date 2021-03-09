@@ -1,6 +1,7 @@
 import rospy
 import numpy as np
 from nav_msgs.msg import Odometry
+from geometry_msgs.msg import PoseStamped
 
 class Bridge:
 	def __init__(self, map):
@@ -38,8 +39,8 @@ class Bridge:
 		self.map.robot.y = data.pose.pose.position.y * self.scale
 
 
-		x_vel = data.twist.twist.linear.x
-		y_vel = data.twist.twist.linear.y
+		x_vel = data.twist.twist.linear.x * self.scale
+		y_vel = data.twist.twist.linear.y * self.scale
 		self.map.robot.addToBridgeRunningVelocity(np.abs(x_vel) + np.abs(y_vel))
 
 
@@ -53,15 +54,21 @@ class Bridge:
 		return angle
 
 	def agentCallback(self, data):
-		# TODO somehow set an identifier for the agent
 		identifier = 0
-		agent = self.map.agents[identifier]
-		agent.x = data.pose.pose.position.x
-		agent.y = data.pose.pose.position.y
+		try:
+			agent = self.map.agents[identifier]
+		except:
+			print('no agent ', identifier)
+			print(len(self.map.agents))
+			return
+		agent.x = data.pose.pose.position.x * self.scale
+		agent.y = data.pose.pose.position.y * self.scale
 		agent.coordinates = (agent.x, agent.y)
 
-		x_vel = data.twist.twist.linear.x
-		y_vel = data.twist.twist.linear.y
+		agent.computeCorridorDistances()
+
+		x_vel = data.twist.twist.linear.x * self.scale
+		y_vel = data.twist.twist.linear.y * self.scale
 		agent.addToBridgeRunningVelocity(np.abs(x_vel) + np.abs(y_vel))
 
 		if 	   (agent.direction > 0 and agent.distance >= agent.maxdist)\

@@ -40,14 +40,16 @@ class Map:
 		self.FUTURE_PREDICTION_TIME = 3
 		self.FAST_FORWARD = 30
 		self.PREDICTION_MARGIN = 30*3
+		self.RUNNING_VELOCITY_THRESHOLD = 40
 		# self.ROBOT_INIT_POSE = (200, 300, 0)
-		self.ROBOT_INIT_POSE = (10, 0, 0)
+		# self.ROBOT_INIT_POSE = (10, 0, 0)
+		self.ROBOT_INIT_POSE = (0, -50, 0)
 
 
 
 		self.G = nx.Graph()
 		self.bgcolour = 0x2F, 0x4F, 0x4F
-		self.size = self.width, self.height = 800, 600
+		self.size = self.width, self.height = 1900, 1000
 		pyg.init()
 		self.screen = pyg.display.set_mode(self.size)
 		self.clock = pyg.time.Clock()
@@ -204,6 +206,20 @@ class Map:
 		return edge_candidates
 
 
+	def pickNewTarget(self, newTarget=None):
+		if not newTarget is None:
+			self.target = newTarget
+			return
+
+		if len(self.rooms) > 1:
+			while True:
+				r = np.random.randint(len(self.rooms))
+				newTarget = list(self.rooms)[r]
+				if self.target != newTarget:
+					self.target = newTarget
+					break
+
+
 	def moveAgents(self):
 		for agentIndex in list(self.agents):
 			self.agents[agentIndex].move()
@@ -224,16 +240,33 @@ class Map:
 			if not self.bridge.enabled and self.robot.automoveEnabled and len(self.waypointPath) > 0:
 				self.robot.automove(self.waypointPath[0])
 			if self.bridge.enabled and not self.robot.automoveEnabled and len(self.waypointPath) > 0:
+				angle = 0
 				try:
-					# TODO calculate angle properly
-					angle = self.robot.direction*self.G.edges[self.robot.edge]['angleAlong']
+					if not self.robot.edge is None:
+						if len(self.waypointPath) > 1:
+							if len(self.nodePath) > 0:
+								direction = 1 if self.nodePath[0] == self.G.edges[self.robot.edge]['end'] else -1
+							else:
+								direction = np.sign(abs(self.rooms[self.target].distance) - self.robot.distance)
+							angle = direction*self.G.edges[self.robot.edge]['angleAlong'] + np.pi
+						else:
+							# TODO test!
+							direction = np.sign(self.rooms[self.target].distance)
+							angle = direction*self.G.edges[self.robot.edge]['angleAlong'] - np.pi/2.
+
+					else:
+						w = self.waypointPath[0]
+						x = self.robot.x
+						y = self.robot.y
+						angle = np.arctan2(w[1]-y, w[0]-x)
+
 				except:
 					angle = 0
-				# print('angle ', angle)
+				print('angle: ', angle)
 				if self.robot.stopMoving:
 					self.bridge.publish((self.robot.x, self.robot.y), angle)
 				else:
-					print(self.waypointPath[0])
+					print('goal: ', self.waypointPath[0])
 					self.bridge.publish(self.waypointPath[0], angle)
 
 			self.eventHandlerLoop()
@@ -251,6 +284,8 @@ class Map:
 
 
 			pyg.display.flip()
+
+			self.chooseTarget()
 
 if __name__ == '__main__':
 	map = Map()

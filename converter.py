@@ -9,7 +9,7 @@ class dimensionConverter:
 	def __init__(self):
 		rospy.init_node('listener', anonymous=True)
 		self.publisher = rospy.Publisher('/DCtransform', PoseStamped, queue_size=1)
-		self.robotListener = rospy.Subscriber('/tracker/pose', PoseStamped, self.trackerCallback, queue_size=1)
+		self.robotListener = rospy.Subscriber('/tracker/pose1', PoseStamped, self.trackerCallback, queue_size=1)
 		self.agentListener = rospy.Subscriber('/DCcontrol', String, self.DCcontrolCallback, queue_size=1)
 
 		self.point = None
