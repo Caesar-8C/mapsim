@@ -59,7 +59,7 @@ def getPreviousDistance(self, edge, direction, stepDist):
 	else:
 		targetDist = self.robot.distance
 
-	while direction*distance < direction*(targetDist - direction*self.PREDICTION_MARGIN):
+	while direction*distance < direction*(targetDist - direction*stepDist):
 		distance += direction*stepDist
 	previousDistance = distance
 	return previousDistance
@@ -87,6 +87,16 @@ def getDirection(self, edge, targetEdge, nodePathCounter):
 			direction = -1
 	return direction
 
+def draw(map, dist, edge):
+	try:
+		node = map.G.edges[edge]['start']
+		x = map.G.nodes[node]['coordinates'][0] - map.G.edges[edge]['cosAlong']*dist
+		y = map.G.nodes[node]['coordinates'][1] - map.G.edges[edge]['sinAlong']*dist
+		map.draw.circle(map.screen, (0, 0, 0), (x, y), 3)
+	except:
+		return
+
+
 def predictFuture(self):
 	corridors = self.pickCorridors()
 	if len(corridors) == 0:
@@ -104,11 +114,14 @@ def predictFuture(self):
 	nodePathCounter = 0
 	direction = self.getDirection(edge, targetEdge, nodePathCounter)
 
-	velocity = np.mean(self.robot.bridgeRunningVelocity) if self.bridge.enabled else self.robot.maxVelocity[0]
-	if velocity < self.RUNNING_VELOCITY_THRESHOLD: velocity = self.robot.maxVelocity[0]
+	velocity = self.robot.getVelocity() if self.bridge.enabled else self.robot.maxVelocity[0]
 	stepDist = velocity*self.FAST_FORWARD
-	previousDistance = self.getPreviousDistance(edge, direction, stepDist)
-	distance = previousDistance + direction*(stepDist + self.PREDICTION_MARGIN)
+	previousDistance = self.getPreviousDistance(edge, direction, self.WAYPOINT_DISTANCE)#stepDist)
+	pass
+	draw(self, previousDistance, edge)
+	distance = previousDistance + direction*stepDist
+	pass
+	draw(self, distance, edge)
 
 	data = []
 	for i in range(int(self.fps*self.FUTURE_PREDICTION_TIME/self.FAST_FORWARD)):
@@ -116,9 +129,9 @@ def predictFuture(self):
 		waypoint_data = []
 		for agent in self.agents:
 			if self.agents[agent].current_node in edge and self.agents[agent].next_node in edge and \
-				direction*self.agents[agent].distance < direction*distance and \
-				direction*self.agents[agent].distance > direction*previousDistance:
-				if not self.agents[agent].lane in waypoint_data: waypoint_data.append(self.agents[agent].lane)
+				direction*self.agents[agent].distance < direction*(distance + self.PREDICTION_MARGIN) and \
+				direction*self.agents[agent].distance > direction*(previousDistance - self.PREDICTION_MARGIN):
+				if not self.agents[agent].lane in waypoint_data:waypoint_data.append(self.agents[agent].lane)
 		data.append(waypoint_data)
 
 		if distance < 0 or distance > self.G.edges[edge]['length']:
@@ -130,12 +143,14 @@ def predictFuture(self):
 			direction = self.getDirection(edge, targetEdge, nodePathCounter)
 			maxDist = self.G.edges[edge]['length']
 			previousDistance = 0 if direction == 1 else maxDist
-			distance = previousDistance + direction*(stepDist + self.PREDICTION_MARGIN)
+			distance = previousDistance + direction*stepDist
+			draw(self, distance, edge)
 			continue
 
 		previousDistance += direction*stepDist
 		distance += direction*stepDist
+		draw(self, distance, edge)
 
 	self.agents = agentsBackup
-	# print('\n\ndata:\n', data)
+	# print('data:', data)
 	return data

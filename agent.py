@@ -51,11 +51,11 @@ class Agent:
 		self.distance = 0 if self.direction == 1 else self.maxdist
 		self.distanceAcross = self.map.G.edges[self.current_node, self.next_node]['width']/2
 
-		self.distance = self.maxdist/2
-		self.distanceAcross = self.map.G.edges[self.current_node, self.next_node]['laneWidth']*2.5
+		# self.distance = self.maxdist/2
+		# self.distanceAcross = self.map.G.edges[self.current_node, self.next_node]['laneWidth']*2.5
 
 		self.changeLane()
-		self.setTargetLane(1)
+		self.setTargetLane(0)
 
 
 	def move(self):
@@ -65,8 +65,10 @@ class Agent:
 			elif time.time() > self.stopTime + self.waitTime():
 				self.stopTimer()
 			return
+		# print(self.lane)
 
 		someoneInTheWay, busyLanes, danger = self.checkForAnyoneNearby()
+		# print(self.lane)
 
 		lanes = range(self.map.G.edges[self.current_node, self.next_node]['lanes'])
 		safeLanes = [i for i in lanes if i not in busyLanes]
@@ -128,7 +130,7 @@ class Agent:
 		self.path = self.map.pathMap[self.current_node][self.goal_node].copy()
 
 	def chooseSpeed(self):
-		self.forwardSpeed = 0 #np.random.random()*20+40
+		self.forwardSpeed = np.random.random()*20+40
 
 	def moveNormal(self):
 		r = np.random.random()
@@ -226,6 +228,7 @@ class Agent:
 			self.direction = 1 if self.current_node == start_node else -1
 			lane = self.findClosestLane()
 			self.setTargetLane(lane)
+			self.lane = lane
 			self.maxdist = self.map.G.edges[self.current_node, self.next_node]['length']
 
 			self.computeCorridorDistances()

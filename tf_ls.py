@@ -13,8 +13,7 @@ class tf_ls:
 		listener =  rospy.Subscriber('/tracker/odometry1', Odometry, self.robotCallback, queue_size=1)
 		listener =  rospy.Subscriber('/tracker/odometry2', Odometry, self.agentCallback, queue_size=1)
 		self.tl = tf.TransformListener()
-		while not rospy.is_shutdown():
-			pass
+		rospy.spin()
 
 	def transform(self, data):
 		pose = PoseStamped()

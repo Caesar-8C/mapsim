@@ -17,7 +17,7 @@ class Robot:
 		self.map = map
 		self.bridgeRunningVelocity = []
 		self.velocity = [0, 0, 0]
-		self.maxVelocity = [100./self.map.fps, 100./self.map.fps, np.pi/self.map.fps] # pixels per second
+		self.maxVelocity = [60./self.map.fps, 60./self.map.fps, np.pi/self.map.fps] # pixels per second
 
 		self.automoveEnabled = False
 		self.stopMoving = False
@@ -128,3 +128,8 @@ class Robot:
 		if len(self.bridgeRunningVelocity) >= self.BRIDGE_RUNNING_MEAN_SIZE:
 			del self.bridgeRunningVelocity[0]
 		self.bridgeRunningVelocity.append(vel)
+
+	def getVelocity(self):
+		velocity = np.mean(self.bridgeRunningVelocity)
+		if velocity < self.map.RUNNING_VELOCITY_THRESHOLD: velocity = self.maxVelocity[0]
+		return velocity

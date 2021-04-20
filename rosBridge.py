@@ -76,3 +76,5 @@ class Bridge:
 			agent.corridorEndReached()
 		else:
 			agent.computeCorridorDistances()
+
+		agent.changeLane()

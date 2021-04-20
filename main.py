@@ -36,14 +36,14 @@ class Map:
 		self.PATH_COLOR = (128, 0, 128)
 		self.WAYPOINT_COLOR = (200, 100, 100)
 		self.WAYPOINT_DISTANCE = 10
-		self.WAYPOINT_MARGIN = 3
-		self.FUTURE_PREDICTION_TIME = 3
+		self.WAYPOINT_MARGIN = 5
+		self.FUTURE_PREDICTION_TIME = 10
 		self.FAST_FORWARD = 30
-		self.PREDICTION_MARGIN = 30*3
-		self.RUNNING_VELOCITY_THRESHOLD = 40
+		self.PREDICTION_MARGIN = 5
+		self.RUNNING_VELOCITY_THRESHOLD = 20
 		# self.ROBOT_INIT_POSE = (200, 300, 0)
 		# self.ROBOT_INIT_POSE = (10, 0, 0)
-		self.ROBOT_INIT_POSE = (0, -50, 0)
+		self.ROBOT_INIT_POSE = (0, 0, 0)
 
 
 
@@ -150,7 +150,7 @@ class Map:
 		agent = Agent(self, self.agentNameCounter, origin_node, end_node, lane, speed)
 		self.agents[self.agentNameCounter] = agent
 		self.agentNameCounter += 1
-		agent.setTargetLane(2)
+		# agent.setTargetLane(1)
 
 	def activeReset(self):
 		self.activeNode = False
@@ -225,6 +225,7 @@ class Map:
 			self.agents[agentIndex].move()
 
 	def main(self):
+		self.run_agent(2, 1)
 		while True:
 			self.clock.tick(self.fps)
 
@@ -250,9 +251,8 @@ class Map:
 								direction = np.sign(abs(self.rooms[self.target].distance) - self.robot.distance)
 							angle = direction*self.G.edges[self.robot.edge]['angleAlong'] + np.pi
 						else:
-							# TODO test!
 							direction = np.sign(self.rooms[self.target].distance)
-							angle = direction*self.G.edges[self.robot.edge]['angleAlong'] - np.pi/2.
+							angle = direction*self.G.edges[self.robot.edge]['angleAlong'] + np.pi
 
 					else:
 						w = self.waypointPath[0]
@@ -262,11 +262,11 @@ class Map:
 
 				except:
 					angle = 0
-				print('angle: ', angle)
+				# print('angle: ', angle)
 				if self.robot.stopMoving:
 					self.bridge.publish((self.robot.x, self.robot.y), angle)
 				else:
-					print('goal: ', self.waypointPath[0])
+					# print('goal: ', self.waypointPath[0])
 					self.bridge.publish(self.waypointPath[0], angle)
 
 			self.eventHandlerLoop()
@@ -282,10 +282,13 @@ class Map:
 			self.drawWaypoints()
 			self.drawRobot()
 
+			self.predictFuture()
+
 
 			pyg.display.flip()
+			# print(self.agents[0].lane, ' ', end='')
 
-			self.chooseTarget()
+			# self.chooseTarget()
 
 if __name__ == '__main__':
 	map = Map()
@@ -293,6 +296,7 @@ if __name__ == '__main__':
 	map.bridge.enable()
 	# map.robot.enableAutomove()
 	# map.loadGraph('data/graph2.txt')
-	map.loadGraph('data/graph_test.txt')
+	# map.loadGraph('data/graph_test.txt')
+	map.loadGraph('data/map.txt')
 
 	map.main()

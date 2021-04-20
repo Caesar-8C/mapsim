@@ -149,7 +149,7 @@ def addTargetWaypoints(self, predictedBusyLanes, node = None):
 		else:
 			targetDist = self.robot.distance
 
-		while direction*distance < direction*(targetDist):
+		while direction*distance < direction*(targetDist - direction*self.WAYPOINT_DISTANCE):
 			distance += direction*self.WAYPOINT_DISTANCE
 	else:
 		if self.G.edges[edge]['start'] == node:
@@ -161,8 +161,12 @@ def addTargetWaypoints(self, predictedBusyLanes, node = None):
 
 	lanes = list(range(self.G.edges[edge]['lanes']))
 
-	step = self.robot.maxVelocity[0]*self.FAST_FORWARD/self.WAYPOINT_DISTANCE
-	waypointCounter = 0
+
+	velocity = self.robot.getVelocity() if self.bridge.enabled else self.robot.maxVelocity[0]
+	timeStep = velocity*self.FAST_FORWARD
+	timeStepDist = distance if direction == 1 else maxDist - distance
+
+	# odd = True
 
 	while distance <= roomDistance-self.WAYPOINT_DISTANCE or roomDistance+self.WAYPOINT_DISTANCE <= distance:
 		if len(predictedBusyLanes) > 0:
@@ -172,10 +176,6 @@ def addTargetWaypoints(self, predictedBusyLanes, node = None):
 
 		self.robot.stopMoving = True if len(emptyLanes) == 0 else False
 
-		waypointCounter += 1
-		if waypointCounter%step == 0 and len(predictedBusyLanes) > 0:
-			del predictedBusyLanes[0]
-
 		if len(emptyLanes) == 0:
 			lane = 0
 		elif direction == 1:
@@ -183,8 +183,16 @@ def addTargetWaypoints(self, predictedBusyLanes, node = None):
 		else:
 			lane = np.min(emptyLanes)
 
+		# lane = 0 if odd else 1
+
 		self.waypointPath.append(self.getLaneCoordinates(edge, distance, lane))
 		distance += direction*self.WAYPOINT_DISTANCE
+		timeStepDist += self.WAYPOINT_DISTANCE
+
+		if timeStepDist > timeStep and len(predictedBusyLanes) > 0:
+			timeStepDist -= timeStep
+			# odd = False if odd else True
+			del predictedBusyLanes[0]
 
 	self.waypointPath.append(self.getLaneCoordinates(edge, distance, targetLane))
 
