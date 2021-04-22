@@ -45,7 +45,11 @@ def getCurrentEdge(self, targetEdge):
 		if len(self.nodePath) < 2:
 			edge = targetEdge
 		else:
-			edge = (self.robot.node, self.nodePath[1])
+			edge = (self.robot.node, self.nodePath[0])
+			try:
+				self.G.edges[edge]
+			except:
+				edge = (self.robot.node, self.nodePath[1])
 	else:
 		edge = None
 	return edge
@@ -69,7 +73,6 @@ def getNextEdge(self, targetEdge, nodePathCounter):
 		edge = targetEdge
 	else:
 		edge = (self.nodePath[nodePathCounter], self.nodePath[nodePathCounter+1])
-		nodePathCounter += 1
 	return edge
 
 def getDirection(self, edge, targetEdge, nodePathCounter):
@@ -137,8 +140,8 @@ def predictFuture(self):
 		if distance < 0 or distance > self.G.edges[edge]['length']:
 			if edge == targetEdge:
 				break
-			nodePathCounter += 1
 			edge = self.getNextEdge(targetEdge, nodePathCounter)
+			nodePathCounter += 1
 
 			direction = self.getDirection(edge, targetEdge, nodePathCounter)
 			maxDist = self.G.edges[edge]['length']

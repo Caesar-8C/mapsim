@@ -36,20 +36,20 @@ class Map:
 		self.PATH_COLOR = (128, 0, 128)
 		self.WAYPOINT_COLOR = (200, 100, 100)
 		self.WAYPOINT_DISTANCE = 10
-		self.WAYPOINT_MARGIN = 5
+		self.WAYPOINT_MARGIN = 2
 		self.FUTURE_PREDICTION_TIME = 10
-		self.FAST_FORWARD = 30
-		self.PREDICTION_MARGIN = 5
+		self.FAST_FORWARD = 10
+		self.PREDICTION_MARGIN = 30
 		self.RUNNING_VELOCITY_THRESHOLD = 20
-		# self.ROBOT_INIT_POSE = (200, 300, 0)
+		self.ROBOT_INIT_POSE = (200, 300, 0)
 		# self.ROBOT_INIT_POSE = (10, 0, 0)
-		self.ROBOT_INIT_POSE = (0, 0, 0)
+		# self.ROBOT_INIT_POSE = (0, 0, 0)
 
 
 
 		self.G = nx.Graph()
 		self.bgcolour = 0x2F, 0x4F, 0x4F
-		self.size = self.width, self.height = 1900, 1000
+		self.size = self.width, self.height = 800, 600
 		pyg.init()
 		self.screen = pyg.display.set_mode(self.size)
 		self.clock = pyg.time.Clock()
@@ -226,6 +226,7 @@ class Map:
 
 	def main(self):
 		self.run_agent(2, 1)
+		self.agents[0].setTargetLane(2)
 		while True:
 			self.clock.tick(self.fps)
 
@@ -293,10 +294,10 @@ class Map:
 if __name__ == '__main__':
 	map = Map()
 
-	map.bridge.enable()
-	# map.robot.enableAutomove()
-	# map.loadGraph('data/graph2.txt')
+	# map.bridge.enable()
+	map.robot.enableAutomove()
+	map.loadGraph('data/graph2.txt')
 	# map.loadGraph('data/graph_test.txt')
-	map.loadGraph('data/map.txt')
+	# map.loadGraph('data/map.txt')
 
 	map.main()

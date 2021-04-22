@@ -65,10 +65,8 @@ class Agent:
 			elif time.time() > self.stopTime + self.waitTime():
 				self.stopTimer()
 			return
-		# print(self.lane)
 
 		someoneInTheWay, busyLanes, danger = self.checkForAnyoneNearby()
-		# print(self.lane)
 
 		lanes = range(self.map.G.edges[self.current_node, self.next_node]['lanes'])
 		safeLanes = [i for i in lanes if i not in busyLanes]
@@ -269,7 +267,6 @@ class Agent:
 		return np.argmin(norms)
 
 	def goalReached(self):
-		return
 		del self.map.agents[self.mapIndex]
 
 	def addToBridgeRunningVelocity(self, vel):
