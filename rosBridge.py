@@ -1,16 +1,16 @@
-import rospy
+# import rospy
 import numpy as np
-from nav_msgs.msg import Odometry
-from geometry_msgs.msg import PoseStamped
+# from nav_msgs.msg import Odometry
+# from geometry_msgs.msg import PoseStamped
 
 class Bridge:
 	def __init__(self, map):
 		self.map = map
 		self.enabled = False
-		rospy.init_node('listener', anonymous=True)
-		self.publisher = rospy.Publisher('/move_base_simple/goal', PoseStamped, queue_size=1)
-		self.robotListener = rospy.Subscriber('/tracker/world_odometry1', Odometry, self.robotCallback, queue_size=1)
-		self.agentListener = rospy.Subscriber('/tracker/world_odometry2', Odometry, self.agentCallback, queue_size=1)
+		# rospy.init_node('listener', anonymous=True)
+		# self.publisher = rospy.Publisher('/move_base_simple/goal', PoseStamped, queue_size=1)
+		# self.robotListener = rospy.Subscriber('/tracker/world_odometry1', Odometry, self.robotCallback, queue_size=1)
+		# self.agentListener = rospy.Subscriber('/tracker/world_odometry2', Odometry, self.agentCallback, queue_size=1)
 		self.scale = 40
 
 	def enable(self):
@@ -19,13 +19,14 @@ class Bridge:
 		self.enabled = False
 
 	def publish(self, waypoint, angle):
-		msg = PoseStamped()
-		msg.header.frame_id = 'world'
-		msg.pose.position.x = waypoint[0]/self.scale
-		msg.pose.position.y = waypoint[1]/self.scale
-		msg.pose.orientation.z = np.sin(angle/2.)
-		msg.pose.orientation.w = np.cos(angle/2.)
-		self.publisher.publish(msg)
+		# msg = PoseStamped()
+		# msg.header.frame_id = 'world'
+		# msg.pose.position.x = waypoint[0]/self.scale
+		# msg.pose.position.y = waypoint[1]/self.scale
+		# msg.pose.orientation.z = np.sin(angle/2.)
+		# msg.pose.orientation.w = np.cos(angle/2.)
+		# self.publisher.publish(msg)
+		pass
 
 	def normalizeAngle(self, angle):
 		while angle < -np.pi:
