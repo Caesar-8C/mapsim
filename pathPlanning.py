@@ -32,6 +32,7 @@ def calculateNodePath(self):
 					self.robot.node = None
 					self.robot.setEdge(edge)
 					del self.nodePath[0]
+					break
 		else:
 			for edge in self.robot.edge_candidates:
 				if edge == targetEdge:
@@ -76,7 +77,7 @@ def calculateWaypointPath(self, predictedBusyLanes):
 				break
 	
 	if len(self.nodePath) != 0:
-		index = len(self.waypointPath)-1
+		index = len(self.waypointPath)-2 #TODO
 		self.addTargetWaypoints(predictedBusyLanes, self.nodePath[-1])
 		self.removeWaypointOverlap(index)
 
@@ -127,11 +128,12 @@ def addEdgeWaypoints(self, predictedBusyLanes, edge, node):
 			lane = np.max(emptyLanes)
 		else:
 			lane = np.min(emptyLanes)
+
+		if 1 in emptyLanes:  #TODO
+			lane = 1
+
 		self.waypointPath.append(self.getLaneCoordinates(edge, distance, lane))
 		distance += direction*self.WAYPOINT_DISTANCE
-
-	while len(self.waypointPath) > 0 and tupleDistance((self.robot.x, self.robot.y), self.waypointPath[0]) < self.WAYPOINT_MARGIN*self.WAYPOINT_DISTANCE:
-		del self.waypointPath[0]
 
 
 def addTargetWaypoints(self, predictedBusyLanes, node = None):
@@ -183,6 +185,8 @@ def addTargetWaypoints(self, predictedBusyLanes, node = None):
 		else:
 			lane = np.min(emptyLanes)
 
+		lane = 1
+
 		self.waypointPath.append(self.getLaneCoordinates(edge, distance, lane))
 		distance += direction*self.WAYPOINT_DISTANCE
 
@@ -191,7 +195,7 @@ def addTargetWaypoints(self, predictedBusyLanes, node = None):
 	while len(self.waypointPath) > 1 and tupleDistance((self.robot.x, self.robot.y), self.waypointPath[0]) < self.WAYPOINT_MARGIN*self.WAYPOINT_DISTANCE:
 		del self.waypointPath[0]
 
-def removeWaypointOverlap(self, index): # TODO check validity after change in predicted Path
+def removeWaypointOverlap(self, index):
 	maxIndex = len(self.waypointPath)-1
 
 	index1 = index
