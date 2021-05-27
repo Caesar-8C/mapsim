@@ -36,20 +36,25 @@ class Map:
 		self.PATH_COLOR = (128, 0, 128)
 		self.WAYPOINT_COLOR = (200, 100, 100)
 		self.WAYPOINT_DISTANCE = 10
-		self.WAYPOINT_MARGIN = 2
+		self.WAYPOINT_MARGIN = 1
 		self.FUTURE_PREDICTION_TIME = 10
-		self.FAST_FORWARD = 10
-		self.PREDICTION_MARGIN = 30
-		self.RUNNING_VELOCITY_THRESHOLD = 20
+		self.FAST_FORWARD = 30
+		self.PREDICTION_MARGIN = 30*3
+		self.RUNNING_VELOCITY_THRESHOLD = 40
 		self.ROBOT_INIT_POSE = (200, 300, 0)
+		# self.ROBOT_INIT_POSE = (700, 500, 0)
+		# self.ROBOT_INIT_POSE = (1680, 445, 0)
+		# self.ROBOT_INIT_POSE = (760, 880, np.pi)
+		self.PLAN_THROTTLE = 3
 		# self.ROBOT_INIT_POSE = (10, 0, 0)
-		# self.ROBOT_INIT_POSE = (0, 0, 0)
+		# self.ROBOT_INIT_POSE = (0, -50, 0)
 
 
 
 		self.G = nx.Graph()
-		self.bgcolour = 0x2F, 0x4F, 0x4F
-		self.size = self.width, self.height = 800, 600
+
+		self.bgcolour = 0x1F, 0x2F, 0x2F#0x2F, 0x4F, 0x4F
+		self.size = self.width, self.height = 800, 600#1900, 1000
 		pyg.init()
 		self.screen = pyg.display.set_mode(self.size)
 		self.clock = pyg.time.Clock()
@@ -63,6 +68,7 @@ class Map:
 		self.nodePath = []
 		self.waypointPath = []
 		self.target = 501
+		self.mainIter = 0
 
 		self.robot = Robot(*self.ROBOT_INIT_POSE, self)
 		self.bridge = Bridge(self)
@@ -78,6 +84,8 @@ class Map:
 		# pyg.time.set_timer(self.AGENT1, 5000)
 		# pyg.time.set_timer(self.AGENT2, 1200)
 		# pyg.time.set_timer(self.AGENT3, 4000)
+
+		self.startTime = time.time()
 
 	def mapChanged(self):
 		self.recalculateEdgeParams()
@@ -224,9 +232,15 @@ class Map:
 		for agentIndex in list(self.agents):
 			self.agents[agentIndex].move()
 
+
 	def main(self):
-		self.run_agent(2, 1)
-		self.agents[0].setTargetLane(2)
+		# self.run_agent(2, 1)
+		# self.agents[0].setTargetLane(2)
+		# self.run_agent(5, 10)
+		# img = pyg.image.load('map.jpg')
+		# dark = pyg.Surface((img.get_width(), img.get_height()), flags=pyg.SRCALPHA)
+		# dark.fill((50, 50, 50, 0))
+		# img.blit(dark, (0, 0), special_flags=pyg.BLEND_RGBA_SUB)
 		while True:
 			self.clock.tick(self.fps)
 
@@ -234,10 +248,13 @@ class Map:
 			if not self.bridge.enabled:
 				self.moveAgents()
 
+			if self.mainIter % self.PLAN_THROTTLE == 0:
+				self.calculateNodePath()
+				predictedEmptyLanes = self.predictFuture()
+				self.calculateWaypointPath(predictedEmptyLanes)
 
-			self.calculateNodePath()
-			predictedEmptyLanes = self.predictFuture()
-			self.calculateWaypointPath(predictedEmptyLanes)
+			while len(self.waypointPath) > 0 and tupleDistance((self.robot.x, self.robot.y), self.waypointPath[0]) < self.WAYPOINT_MARGIN*self.WAYPOINT_DISTANCE:
+				del self.waypointPath[0]
 
 			if not self.bridge.enabled and self.robot.automoveEnabled and len(self.waypointPath) > 0:
 				self.robot.automove(self.waypointPath[0])
@@ -274,6 +291,10 @@ class Map:
 			
 
 			self.screen.fill(self.bgcolour)
+
+			# self.screen.blit(dark, (0, 0), special_flags=pyg.BLEND_RGBA_SUB)
+			# self.screen.blit(img, (0, 0), special_flags=pyg.BLEND_RGBA_ADD)
+
 			self.drawNodes(color=self.CORRIDOR_COLOR)
 			self.drawCorridors()
 			self.drawNodes(radius=self.NODE_CORE_SIZE)
@@ -283,21 +304,23 @@ class Map:
 			self.drawWaypoints()
 			self.drawRobot()
 
-			self.predictFuture()
-
 
 			pyg.display.flip()
-			# print(self.agents[0].lane, ' ', end='')
+			self.mainIter += 1
 
-			# self.chooseTarget()
+			# if not self.startTime is None and time.time() > self.startTime + 10:
+			# 	quit()
+
 
 if __name__ == '__main__':
 	map = Map()
 
 	# map.bridge.enable()
 	map.robot.enableAutomove()
+
+	# map.loadGraph('data/size_test3.txt')
 	map.loadGraph('data/graph2.txt')
 	# map.loadGraph('data/graph_test.txt')
-	# map.loadGraph('data/map.txt')
+	# map.loadGraph('data/big_graph_2.txt')
 
 	map.main()

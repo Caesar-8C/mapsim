@@ -8,7 +8,8 @@ class Agent:
 		self.SAFETY_LIMIT = 10
 		self.RANDOM_NORMAL_CHANGE_SPEED = 0.0005
 		self.RANDOM_NORMAL_CHANGE_LANE = 0.0005
-		self.RANDOM_NORMAL_STOP = 0.05
+		self.RANDOM_NORMAL_STOP = 0.0005
+		self.RANDOM_CHANGE_GOAL = 0.4
 		self.LANE_REACHED = 2
 		self.BRIDGE_RUNNING_MEAN_SIZE = 5
 		self.fastforward = 1
@@ -51,18 +52,18 @@ class Agent:
 		self.distance = 0 if self.direction == 1 else self.maxdist
 		self.distanceAcross = self.map.G.edges[self.current_node, self.next_node]['width']/2
 
-		# self.distance = self.maxdist/2
+
+		# self.distance = 70 #self.maxdist/2
 		# self.distanceAcross = self.map.G.edges[self.current_node, self.next_node]['laneWidth']*2.5
 
 		self.changeLane()
-		self.setTargetLane(0)
 
 
 	def move(self):
 		if self.stop:
 			if self.stopTime is None:
 				self.startTimer()
-			elif time.time() > self.stopTime + self.waitTime():
+			elif time.time() > self.stopTime + self.waitTime:
 				self.stopTimer()
 			return
 
@@ -85,6 +86,7 @@ class Agent:
 
 
 	def startTimer(self, waitTime=None):
+		self.stop = True
 		self.stopTime = time.time()
 		if waitTime is None:
 			self.waitTime = np.random.random()*10+5
@@ -93,7 +95,7 @@ class Agent:
 
 	def stopTimer(self):
 		r = np.random.random()
-		if r < 0.4:
+		if r < self.RANDOM_CHANGE_GOAL:
 			self.chooseGoal()
 			self.calculatePath()
 		self.stop = False
@@ -157,9 +159,11 @@ class Agent:
 		if self.direction > 0:
 			if len(higherLanes) > 0:
 				targetLane = min(higherLanes)
+			# targetLane = min(safeLanes)
 		else:
 			if len(lowerLanes) > 0:
 				targetLane = max(lowerLanes)
+			# targetLane = max(safeLanes)
 
 
 		if not targetLane is None:

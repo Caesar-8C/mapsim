@@ -59,15 +59,13 @@ def eventHandlerLoop(self):
 
 		if event.type == pyg.KEYDOWN:
 			if event.key == pyg.K_k:
-				self.saveGraph('data/map.txt')
+				self.saveGraph('data/graph7.txt')
 			if event.key == pyg.K_l:
-				self.loadGraph('data/map.txt')
+				self.loadGraph('data/graph2.txt')
 
 
-			if event.key == pyg.K_x:
-				self.run_agent()
 			if event.key == pyg.K_c:
-				self.run_agent(2, 1)
+				self.run_agent()
 
 		if event.type == self.AGENT1:
 			self.run_agent(origin_node=2, end_node=3, lane=1, speed=60)

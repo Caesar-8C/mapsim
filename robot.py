@@ -3,7 +3,6 @@ from utils import tupleDistance, tupleSubtract, normalizeAngle
 
 class Robot:
 	def __init__(self, x, y, theta, map):
-		self.resetCoordinates = (x, y)
 		self.x = x
 		self.y = y
 		self.theta = theta
@@ -37,6 +36,12 @@ class Robot:
 
 		self.mapLocate()
 
+	def rotDir(self, angle, robotAngle):
+		dir = np.sign(angle - robotAngle)
+		rotError = angle - robotAngle
+		if np.abs(rotError) > np.pi:
+			dir *= -1
+		return dir
 
 	def automove(self, waypoint):
 		if not self.stopMoving:
@@ -45,7 +50,7 @@ class Robot:
 			self.y += self.maxVelocity[0]*np.sin(angle)
 			angle = normalizeAngle(angle)
 			robotAngle = normalizeAngle(self.theta)
-			self.theta += self.maxVelocity[2]*np.sign(angle-robotAngle)
+			self.theta += self.maxVelocity[2]*self.rotDir(angle, robotAngle)
 		self.mapLocate()
 
 
@@ -114,8 +119,9 @@ class Robot:
 
 
 	def reset(self):
-		self.x, self.y = self.resetCoordinates
-		self.theta = 0
+		self.x = self.map.ROBOT_INIT_POSE[0]
+		self.y = self.map.ROBOT_INIT_POSE[1]
+		self.theta = self.map.ROBOT_INIT_POSE[2]
 		self.velocity = [0, 0, 0]
 
 	def enableAutomove(self):
